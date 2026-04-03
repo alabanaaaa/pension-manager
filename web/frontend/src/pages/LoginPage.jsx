@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import {
-  Shield, Eye, EyeOff, Loader2, AlertCircle,
-  Sparkles, ArrowRight, CheckCircle2
-} from 'lucide-react';
+import { Shield, Eye, EyeOff, Loader2, AlertCircle, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
   const { login, error } = useAuth();
@@ -18,12 +15,10 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setFormError('');
-
     if (!email || !password) {
       setFormError('Please enter both email and password');
       return;
     }
-
     setLoading(true);
     try {
       await login(email, password);
@@ -36,79 +31,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 flex">
-      {/* Left panel - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-        {/* Background pattern */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-600/20 to-indigo-600/20" />
-          <div className="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-20 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-400/5 rounded-full blur-3xl" />
-        </div>
-
-        {/* Content */}
-        <div className="relative z-10 flex flex-col justify-center px-16 text-white">
-          <div className="inline-flex items-center gap-3 mb-8">
-            <div className="w-14 h-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
-              <Shield size={28} className="text-blue-300" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">Pension Manager</h1>
-              <p className="text-blue-200/70 text-sm">Fund Management System</p>
-            </div>
-          </div>
-
-          <h2 className="text-5xl font-bold leading-tight mb-6">
-            Secure & Smart<br />
-            <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Pension Management
-            </span>
-          </h2>
-
-          <p className="text-lg text-blue-200/70 max-w-md mb-12">
-            Manage contributions, claims, voting, and member benefits all in one place.
-          </p>
-
-          {/* Feature cards */}
-          <div className="space-y-4">
-            {[
-              { icon: Shield, title: 'Enterprise Security', desc: 'JWT auth, IP blacklisting, OTP' },
-              { icon: CheckCircle2, title: 'Maker-Checker Workflow', desc: 'All changes require approval' },
-              { icon: Sparkles, title: 'Smart Projections', desc: 'DB & DC benefit calculations' },
-            ].map((feature, i) => (
-              <div key={i} className="flex items-center gap-4 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
-                <div className="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <feature.icon size={20} className="text-blue-300" />
-                </div>
-                <div>
-                  <p className="font-medium">{feature.title}</p>
-                  <p className="text-sm text-blue-200/50">{feature.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Right panel - Login form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4">
-              <Shield size={32} className="text-blue-300" />
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-10 text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-4 backdrop-blur-sm">
+              <Shield size={32} className="text-white" />
             </div>
             <h1 className="text-2xl font-bold text-white">Pension Manager</h1>
+            <p className="text-blue-100 mt-1 text-sm">Sign in to your account</p>
           </div>
 
-          {/* Form card */}
-          <div className="bg-white rounded-3xl shadow-2xl shadow-black/20 p-8 lg:p-10">
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold text-gray-900">Welcome back</h2>
-              <p className="text-gray-500 mt-1">Sign in to your account to continue</p>
-            </div>
-
+          {/* Form */}
+          <div className="px-8 py-8">
             <form onSubmit={handleSubmit} className="space-y-5">
               {(formError || error) && (
                 <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100">
@@ -188,11 +125,11 @@ export default function LoginPage() {
               </p>
             </div>
           </div>
-
-          <p className="text-center text-white/30 text-sm mt-8">
-            © 2026 Pension Fund Management System
-          </p>
         </div>
+
+        <p className="text-center text-gray-400 text-sm mt-6">
+          © 2026 Pension Fund Management System
+        </p>
       </div>
     </div>
   );
