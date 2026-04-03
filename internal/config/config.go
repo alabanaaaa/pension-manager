@@ -14,6 +14,7 @@ type Config struct {
 	LogLevel    string
 	Env         string
 	Mpesa       MpesaConfig
+	NewsAPI     NewsAPIConfig
 }
 
 type MpesaConfig struct {
@@ -23,6 +24,10 @@ type MpesaConfig struct {
 	Passkey        string
 	CallbackURL    string
 	APIVersion     string
+}
+
+type NewsAPIConfig struct {
+	APIKey string
 }
 
 func Load() (*Config, error) {
@@ -39,6 +44,9 @@ func Load() (*Config, error) {
 			Passkey:        getEnv("MPESA_PASSKEY", ""),
 			CallbackURL:    getEnv("MPESA_CALLBACK_URL", "http://localhost:8080/mpesa/callback"),
 			APIVersion:     getEnv("MPESA_API_VERSION", "v3"),
+		},
+		NewsAPI: NewsAPIConfig{
+			APIKey: getEnv("NEWS_API_KEY", ""),
 		},
 	}
 

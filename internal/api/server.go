@@ -77,7 +77,14 @@ func New(database *db.DB, cfg *config.Config) *Server {
 	smsService := sms.NewService(sms.NewMockProvider())
 	taxReminderSvc := tax.NewReminderService(database)
 	ipBlacklistSvc := security.NewIPBlacklistService(database)
-	newsService := news.NewService(news.NewMockProvider(), 15*time.Minute)
+	newsService := func() *news.Service {
+		if cfg.NewsAPI.APIKey != "" {
+			slog.Info("NewsAPI configured — fetching live Kenya government news")
+			return news.NewService(news.NewNewsAPIProvider(cfg.NewsAPI.APIKey), 15*time.Minute)
+		}
+		slog.Warn("NewsAPI not configured — using mock provider with sample Kenya news")
+		return news.NewService(news.NewMockProvider(), 15*time.Minute)
+	}()
 
 	s := &Server{
 		router:          chi.NewRouter(),
