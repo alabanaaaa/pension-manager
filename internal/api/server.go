@@ -15,6 +15,7 @@ import (
 	"pension-manager/internal/documents"
 	"pension-manager/internal/hospital"
 	"pension-manager/internal/mpesa"
+	"pension-manager/internal/news"
 	"pension-manager/internal/portal"
 	"pension-manager/internal/reports"
 	"pension-manager/internal/security"
@@ -44,6 +45,7 @@ type Server struct {
 	smsService      *sms.Service
 	taxReminderSvc  *tax.Service
 	ipBlacklistSvc  *security.Service
+	newsService     *news.Service
 }
 
 func New(database *db.DB, cfg *config.Config) *Server {
@@ -75,6 +77,7 @@ func New(database *db.DB, cfg *config.Config) *Server {
 	smsService := sms.NewService(sms.NewMockProvider())
 	taxReminderSvc := tax.NewReminderService(database)
 	ipBlacklistSvc := security.NewIPBlacklistService(database)
+	newsService := news.NewService(news.NewMockProvider(), 15*time.Minute)
 
 	s := &Server{
 		router:          chi.NewRouter(),
@@ -92,6 +95,7 @@ func New(database *db.DB, cfg *config.Config) *Server {
 		smsService:      smsService,
 		taxReminderSvc:  taxReminderSvc,
 		ipBlacklistSvc:  ipBlacklistSvc,
+		newsService:     newsService,
 	}
 
 	s.mountMiddleware()
@@ -210,6 +214,9 @@ func (s *Server) mountRoutes() {
 
 		// IP Blacklist Routes
 		s.registerIPBlacklistRoutes(r)
+
+		// Kenya Government News Routes
+		s.registerNewsRoutes(r)
 	})
 }
 
