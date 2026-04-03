@@ -22,6 +22,7 @@ import (
 	"pension-manager/internal/sms"
 	"pension-manager/internal/sponsor"
 	"pension-manager/internal/tax"
+	"pension-manager/internal/ussd"
 	"pension-manager/internal/voting"
 
 	"github.com/go-chi/chi/v5"
@@ -46,6 +47,7 @@ type Server struct {
 	taxReminderSvc  *tax.Service
 	ipBlacklistSvc  *security.Service
 	newsService     *news.Service
+	ussdService     *ussd.Service
 }
 
 func New(database *db.DB, cfg *config.Config) *Server {
@@ -86,6 +88,17 @@ func New(database *db.DB, cfg *config.Config) *Server {
 		return news.NewService(news.NewMockProvider(), 15*time.Minute)
 	}()
 
+	// USSD Service (Africa's Talking)
+	ussdService := func() *ussd.Service {
+		ussdProvider := ussd.NewAfricaTalkingProvider(
+			"atsk_12644551b2bfab30e7ea666ec36e7c6e564df2ee750320e5402e59574a758dd1fb37d214",
+			"*384*28346#",
+			"sandbox",
+		)
+		ussdVotingAdapter := ussd.NewVotingServiceAdapter(database)
+		return ussd.NewService(ussdProvider, ussdVotingAdapter)
+	}()
+
 	s := &Server{
 		router:          chi.NewRouter(),
 		db:              database,
@@ -103,6 +116,7 @@ func New(database *db.DB, cfg *config.Config) *Server {
 		taxReminderSvc:  taxReminderSvc,
 		ipBlacklistSvc:  ipBlacklistSvc,
 		newsService:     newsService,
+		ussdService:     ussdService,
 	}
 
 	s.mountMiddleware()
@@ -142,6 +156,9 @@ func (s *Server) mountRoutes() {
 
 	// M-Pesa callback (no auth required - called by Safaricom)
 	s.router.Post("/api/mpesa/callback", s.mpesaCallback)
+
+	// USSD callback (no auth required - called by Africa's Talking)
+	s.router.Post("/api/ussd/voting", s.handleUSSDVoting)
 
 	s.router.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))

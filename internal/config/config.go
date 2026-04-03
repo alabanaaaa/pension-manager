@@ -32,7 +32,7 @@ type NewsAPIConfig struct {
 
 func Load() (*Config, error) {
 	cfg := &Config{
-		DatabaseURL: getEnv("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/minidb?sslmode=disable"),
+		DatabaseURL: getEnv("DATABASE_URL", "postgres://fatoumata@localhost:5432/minidb?sslmode=disable"),
 		HTTPPort:    getEnvInt("HTTP_PORT", 8080),
 		JWTSecret:   getEnv("JWT_SECRET", "change-me-in-production"),
 		LogLevel:    strings.ToLower(getEnv("LOG_LEVEL", "info")),
