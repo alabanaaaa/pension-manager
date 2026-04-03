@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { contributions } from '../lib/api';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { CreditCard, TrendingUp, Loader2 } from 'lucide-react';
+import { CreditCard, TrendingUp, Loader2, Plus, Download } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function ContributionsPage() {
   const [data, setData] = useState([]);
@@ -14,7 +15,6 @@ export default function ContributionsPage() {
       .then(res => {
         const items = res.data || [];
         setData(items);
-        // Group by month for chart
         const grouped = {};
         items.slice(0, 50).forEach(c => {
           const month = new Date(c.period).toLocaleDateString('en', { month: 'short', year: '2-digit' });
@@ -31,61 +31,71 @@ export default function ContributionsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Contributions</h1>
-        <p className="text-gray-500 mt-1">{data.length} records</p>
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Contributions</h1>
+          <p className="text-neutral-500 mt-1">{data.length} records</p>
+        </div>
+        <div className="flex gap-2">
+          <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-all">
+            <Download size={15} /> Export
+          </button>
+          <Link to="/contributions/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-all">
+            <Plus size={15} /> Record
+          </Link>
+        </div>
       </div>
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div className="bg-white rounded-xl border p-5">
-          <h2 className="text-lg font-semibold mb-4">Monthly Trends</h2>
-          <ResponsiveContainer width="100%" height={300}>
+        <div className="bg-white rounded-2xl border border-neutral-100 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Monthly Trends</h2>
+          </div>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" fontSize={12} />
-              <YAxis fontSize={12} />
-              <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} />
-              <Bar dataKey="employee" fill="#3b82f6" name="Employee" />
-              <Bar dataKey="employer" fill="#10b981" name="Employer" />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
+              <XAxis dataKey="month" fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} />
+              <YAxis fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
+              <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} contentStyle={{ borderRadius: '12px', border: '1px solid #e7e5e4', boxShadow: 'none' }} />
+              <Bar dataKey="employee" fill="#171717" name="Employee" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="employer" fill="#a8a29e" name="Employer" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center"><Loader2 size={32} className="animate-spin mx-auto text-gray-400" /></div>
+          <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
         ) : data.length === 0 ? (
-          <div className="p-12 text-center text-gray-500">No contributions found</div>
+          <div className="p-16 text-center"><p className="text-sm text-neutral-400">No contributions found</p></div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Period</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Member</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Employee</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Employer</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">AVC</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Total</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
+              <thead>
+                <tr className="border-b border-neutral-50">
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
+                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee</th>
+                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer</th>
+                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">AVC</th>
+                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Total</th>
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-neutral-50">
                 {data.slice(0, 20).map(c => (
-                  <tr key={c.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">{new Date(c.period).toLocaleDateString()}</td>
-                    <td className="px-4 py-3">{c.member_name || c.member_id}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs">KES {((c.employee_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs">KES {((c.employer_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs">KES {((c.avc_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-right font-mono text-xs font-semibold">KES {((c.total_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${c.status === 'confirmed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                        {c.status}
-                      </span>
+                  <tr key={c.id} className="hover:bg-neutral-50/50 transition-colors">
+                    <td className="px-6 py-4 text-neutral-500">{new Date(c.period).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 font-medium text-neutral-900">{c.member_name || c.member_id}</td>
+                    <td className="px-6 py-4 text-right font-mono text-xs text-neutral-600">KES {((c.employee_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right font-mono text-xs text-neutral-600">KES {((c.employer_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right font-mono text-xs text-neutral-600 hidden sm:table-cell">KES {((c.avc_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-6 py-4 text-right font-mono text-xs font-semibold text-neutral-900">KES {((c.total_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${c.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{c.status}</span>
                     </td>
                   </tr>
                 ))}

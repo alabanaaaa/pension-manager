@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { members } from '../lib/api';
 import {
   Search, Plus, Filter, ChevronLeft, ChevronRight,
-  Edit, Trash2, Eye, Download, Upload, Loader2
+  Edit, Eye, Upload, Loader2, ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 
 export default function MembersPage() {
@@ -17,138 +17,116 @@ export default function MembersPage() {
   const fetchMembers = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await members.list({
-        search,
-        limit,
-        offset: (page - 1) * limit,
-      });
+      const res = await members.list({ search, limit, offset: (page - 1) * limit });
       setData(res.data.members || []);
       setTotal(res.data.total || 0);
-    } catch {
-      setData([]);
-    } finally {
-      setLoading(false);
-    }
+    } catch { setData([]); }
+    finally { setLoading(false); }
   }, [search, page]);
 
-  useEffect(() => {
-    fetchMembers();
-  }, [fetchMembers]);
+  useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
   const totalPages = Math.ceil(total / limit);
 
-  const statusColors = {
-    active: 'bg-green-100 text-green-800',
-    retired: 'bg-blue-100 text-blue-800',
-    deceased: 'bg-gray-100 text-gray-800',
-    deferred: 'bg-yellow-100 text-yellow-800',
-    withdrawn: 'bg-red-100 text-red-800',
+  const statusMap = {
+    active: { label: 'Active', cls: 'bg-emerald-50 text-emerald-700' },
+    retired: { label: 'Retired', cls: 'bg-blue-50 text-blue-700' },
+    deceased: { label: 'Deceased', cls: 'bg-neutral-100 text-neutral-600' },
+    deferred: { label: 'Deferred', cls: 'bg-amber-50 text-amber-700' },
+    withdrawn: { label: 'Withdrawn', cls: 'bg-red-50 text-red-700' },
   };
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Members</h1>
-          <p className="text-gray-500 mt-1">{total} total members</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Members</h1>
+          <p className="text-neutral-500 mt-1">{total} total members</p>
         </div>
         <div className="flex gap-2">
-          <Link
-            to="/bulk/import"
-            className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm font-medium hover:bg-gray-50"
-          >
-            <Upload size={16} />
-            Import
+          <Link to="/bulk/import" className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-all">
+            <Upload size={15} /> Import
           </Link>
-          <Link
-            to="/members/new"
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
-          >
-            <Plus size={16} />
-            Add Member
+          <Link to="/members/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-all">
+            <Plus size={15} /> Add Member
           </Link>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-xl border p-4 flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by name, member number, ID..."
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 border rounded-lg text-sm hover:bg-gray-50">
-          <Filter size={16} />
-          Filters
-        </button>
+      {/* Search */}
+      <div className="relative">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-300" />
+        <input
+          type="text"
+          placeholder="Search by name, member number, ID..."
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          className="w-full pl-9 pr-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-all placeholder:text-neutral-300"
+        />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border overflow-hidden">
+      <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
         {loading ? (
-          <div className="p-12 text-center">
-            <Loader2 size={32} className="animate-spin mx-auto text-gray-400" />
-            <p className="text-gray-500 mt-3">Loading members...</p>
+          <div className="p-16 text-center">
+            <Loader2 size={24} className="animate-spin mx-auto text-neutral-300" />
+            <p className="text-sm text-neutral-400 mt-3">Loading members...</p>
           </div>
         ) : data.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-gray-500">No members found</p>
+          <div className="p-16 text-center">
+            <p className="text-sm text-neutral-400">No members found</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
-                <tr>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Member</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500 hidden md:table-cell">Member No</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500 hidden lg:table-cell">Department</th>
-                  <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500 hidden sm:table-cell">Balance</th>
-                  <th className="text-right px-4 py-3 font-medium text-gray-500">Actions</th>
+              <thead>
+                <tr className="border-b border-neutral-50">
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden md:table-cell">Member No</th>
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden lg:table-cell">Department</th>
+                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Balance</th>
+                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
-                {data.map((member) => (
-                  <tr key={member.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium text-xs">
-                          {member.first_name?.[0]}{member.last_name?.[0]}
+              <tbody className="divide-y divide-neutral-50">
+                {data.map((member) => {
+                  const st = statusMap[member.membership_status] || { label: member.membership_status, cls: 'bg-neutral-50 text-neutral-600' };
+                  return (
+                    <tr key={member.id} className="hover:bg-neutral-50/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-600 font-medium text-xs flex-shrink-0">
+                            {member.first_name?.[0]}{member.last_name?.[0]}
+                          </div>
+                          <div>
+                            <p className="font-medium text-neutral-900">{member.first_name} {member.last_name}</p>
+                            <p className="text-xs text-neutral-400">{member.email || member.phone}</p>
+                          </div>
                         </div>
-                        <div>
-                          <p className="font-medium">{member.first_name} {member.last_name}</p>
-                          <p className="text-gray-500 text-xs">{member.email || member.phone}</p>
+                      </td>
+                      <td className="px-6 py-4 hidden md:table-cell font-mono text-xs text-neutral-500">{member.member_no}</td>
+                      <td className="px-6 py-4 hidden lg:table-cell text-neutral-500">{member.department || '—'}</td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
+                      </td>
+                      <td className="px-6 py-4 text-right hidden sm:table-cell font-mono text-xs text-neutral-600">
+                        KES {((member.account_balance || 0) / 100).toLocaleString()}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Link to={`/members/${member.id}`} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors" title="View">
+                            <Eye size={15} className="text-neutral-400" />
+                          </Link>
+                          <Link to={`/members/${member.id}/edit`} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors" title="Edit">
+                            <Edit size={15} className="text-neutral-400" />
+                          </Link>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 hidden md:table-cell font-mono text-xs">{member.member_no}</td>
-                    <td className="px-4 py-3 hidden lg:table-cell text-gray-500">{member.department || '—'}</td>
-                    <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[member.membership_status] || 'bg-gray-100 text-gray-800'}`}>
-                        {member.membership_status || 'unknown'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-right hidden sm:table-cell font-mono text-xs">
-                      KES {((member.account_balance || 0) / 100).toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Link to={`/members/${member.id}`} className="p-1.5 hover:bg-gray-100 rounded" title="View">
-                          <Eye size={16} className="text-gray-500" />
-                        </Link>
-                        <Link to={`/members/${member.id}/edit`} className="p-1.5 hover:bg-gray-100 rounded" title="Edit">
-                          <Edit size={16} className="text-gray-500" />
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -156,45 +134,28 @@ export default function MembersPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-4 py-3 border-t flex items-center justify-between">
-            <p className="text-sm text-gray-500">
+          <div className="px-6 py-4 border-t border-neutral-50 flex items-center justify-between">
+            <p className="text-sm text-neutral-400">
               Showing {(page - 1) * limit + 1}–{Math.min(page * limit, total)} of {total}
             </p>
             <div className="flex gap-1">
-              <button
-                onClick={() => setPage(Math.max(1, page - 1))}
-                disabled={page === 1}
-                className="p-2 border rounded hover:bg-gray-50 disabled:opacity-50"
-              >
-                <ChevronLeft size={16} />
+              <button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1} className="p-2 hover:bg-neutral-50 rounded-lg disabled:opacity-30 transition-colors">
+                <ChevronLeft size={16} className="text-neutral-400" />
               </button>
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
-                if (totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (page <= 3) {
-                  pageNum = i + 1;
-                } else if (page >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i;
-                } else {
-                  pageNum = page - 2 + i;
-                }
+                if (totalPages <= 5) pageNum = i + 1;
+                else if (page <= 3) pageNum = i + 1;
+                else if (page >= totalPages - 2) pageNum = totalPages - 4 + i;
+                else pageNum = page - 2 + i;
                 return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`w-8 h-8 rounded text-sm font-medium ${page === pageNum ? 'bg-blue-600 text-white' : 'hover:bg-gray-50'}`}
-                  >
+                  <button key={pageNum} onClick={() => setPage(pageNum)} className={`w-8 h-8 rounded-lg text-sm font-medium transition-all ${page === pageNum ? 'bg-neutral-900 text-white' : 'hover:bg-neutral-50 text-neutral-500'}`}>
                     {pageNum}
                   </button>
                 );
               })}
-              <button
-                onClick={() => setPage(Math.min(totalPages, page + 1))}
-                disabled={page === totalPages}
-                className="p-2 border rounded hover:bg-gray-50 disabled:opacity-50"
-              >
-                <ChevronRight size={16} />
+              <button onClick={() => setPage(Math.min(totalPages, page + 1))} disabled={page === totalPages} className="p-2 hover:bg-neutral-50 rounded-lg disabled:opacity-30 transition-colors">
+                <ChevronRight size={16} className="text-neutral-400" />
               </button>
             </div>
           </div>
