@@ -111,23 +111,20 @@ CREATE INDEX idx_pending_changes_entity ON pending_changes(entity_type, entity_i
 CREATE INDEX idx_pending_changes_status ON pending_changes(status);
 CREATE INDEX idx_pending_changes_scheme ON pending_changes(scheme_id);
 
--- Document management table
-CREATE TABLE IF NOT EXISTS documents (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    entity_type     TEXT NOT NULL,
-    entity_id       UUID NOT NULL,
-    scheme_id       UUID NOT NULL REFERENCES schemes(id),
-    document_type   TEXT NOT NULL,  -- death_certificate, id, marriage_cert, claim_form, etc.
-    file_name       TEXT NOT NULL,
-    file_size       BIGINT NOT NULL,
-    mime_type       TEXT NOT NULL,
-    storage_path    TEXT NOT NULL,  -- S3 key or local path
-    uploaded_by     UUID NOT NULL,
-    created_at      TIMESTAMPTZ DEFAULT NOW()
-);
-CREATE INDEX idx_documents_entity ON documents(entity_type, entity_id);
-CREATE INDEX idx_documents_scheme ON documents(scheme_id);
-CREATE INDEX idx_documents_type ON documents(document_type);
+-- Document management table (already exists in 001, add missing columns)
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS document_type TEXT;
+UPDATE documents SET document_type = doc_type WHERE document_type IS NULL AND doc_type IS NOT NULL;
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS mime_type TEXT NOT NULL DEFAULT 'application/octet-stream';
+ALTER TABLE documents ADD COLUMN IF NOT EXISTS storage_path TEXT;
+UPDATE documents SET storage_path = file_path WHERE storage_path IS NULL AND file_path IS NOT NULL;
+ALTER TABLE documents ALTER COLUMN storage_path SET NOT NULL;
+ALTER TABLE documents ALTER COLUMN document_type SET NOT NULL;
+-- Add uploaded_by FK if missing
+ALTER TABLE documents ALTER COLUMN uploaded_by SET NOT NULL;
+-- Add scheme_id NOT NULL if missing
+ALTER TABLE documents ALTER COLUMN scheme_id SET NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_documents_scheme ON documents(scheme_id);
+CREATE INDEX IF NOT EXISTS idx_documents_type ON documents(document_type);
 
 -- Tax exemption reminders table
 CREATE TABLE IF NOT EXISTS tax_exemption_reminders (
