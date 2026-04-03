@@ -6,6 +6,7 @@ import {
   PartyPopper, ArrowRight, CheckCircle2, Sparkles,
   Calendar, CreditCard, Building2, MapPin, Phone
 } from 'lucide-react';
+import bankLogo from '/bank-logo.svg';
 
 const steps = [
   { id: 'personal', label: 'Personal', icon: User },
@@ -81,9 +82,7 @@ export default function RegisterPage() {
       <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm animate-scale-in">
           <div className="flex items-center gap-3 mb-12">
-            <div className="w-10 h-10 bg-neutral-900 rounded-xl flex items-center justify-center">
-              <Shield size={20} className="text-white" />
-            </div>
+            <img src={bankLogo} alt="Logo" className="w-10 h-10" />
             <div>
               <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Pension Manager</h1>
               <p className="text-xs text-neutral-400">Fund Management System</p>
@@ -158,9 +157,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md animate-fade-in-up">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-12">
-          <div className="w-10 h-10 bg-neutral-900 rounded-xl flex items-center justify-center">
-            <Shield size={20} className="text-white" />
-          </div>
+          <img src={bankLogo} alt="Logo" className="w-10 h-10" />
           <div>
             <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Pension Manager</h1>
             <p className="text-xs text-neutral-400">Create your account</p>
@@ -440,12 +437,17 @@ export default function RegisterPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-neutral-400 mt-8 animate-fade-in-up stagger-5">
-          Already have an account?{' '}
-          <Link to="/login" className="text-neutral-900 hover:underline font-medium">
-            Sign in
-          </Link>
-        </p>
+        <div className="mt-8 animate-fade-in-up stagger-5">
+          <p className="text-center text-sm text-neutral-400">
+            Already have an account?{' '}
+            <Link to="/login" className="text-neutral-900 hover:underline font-medium">
+              Sign in
+            </Link>
+          </p>
+          <p className="text-center text-xs text-neutral-300 mt-6">
+            Powered by <span className="font-medium text-neutral-400">minidb</span>
+          </p>
+        </div>
       </div>
     </div>
   );

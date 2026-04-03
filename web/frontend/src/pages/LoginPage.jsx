@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Eye, EyeOff, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Loader2, AlertCircle, ArrowRight } from 'lucide-react';
+import bankLogo from '/bank-logo.svg';
 
 export default function LoginPage() {
   const { login, error } = useAuth();
@@ -35,9 +36,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm animate-fade-in-up">
         {/* Logo */}
         <div className="flex items-center gap-3 mb-12">
-          <div className="w-10 h-10 bg-neutral-900 rounded-xl flex items-center justify-center">
-            <Shield size={20} className="text-white" />
-          </div>
+          <img src={bankLogo} alt="Logo" className="w-10 h-10" />
           <div>
             <h1 className="text-lg font-semibold text-neutral-900 tracking-tight">Pension Manager</h1>
             <p className="text-xs text-neutral-400">Fund Management System</p>
@@ -124,12 +123,17 @@ export default function LoginPage() {
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-neutral-400 mt-8 animate-fade-in-up stagger-5">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-neutral-900 hover:underline font-medium">
-            Create one
-          </Link>
-        </p>
+        <div className="mt-8 animate-fade-in-up stagger-5">
+          <p className="text-center text-sm text-neutral-400">
+            Don't have an account?{' '}
+            <Link to="/register" className="text-neutral-900 hover:underline font-medium">
+              Create one
+            </Link>
+          </p>
+          <p className="text-center text-xs text-neutral-300 mt-6">
+            Powered by <span className="font-medium text-neutral-400">minidb</span>
+          </p>
+        </div>
       </div>
     </div>
   );
