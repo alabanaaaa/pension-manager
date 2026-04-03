@@ -50,11 +50,12 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var userID, schemeID, role, name, passwordHash string
+	var userID, role, name, passwordHash string
+	var schemeID sql.NullString
 	var active, locked bool
 	var failedLogins int
 	err := s.db.QueryRowContext(r.Context(), `
-		SELECT id, COALESCE(scheme_id, ''), role, name, password_hash, active, locked, failed_logins
+		SELECT id, scheme_id, role, name, password_hash, active, locked, failed_logins
 		FROM system_users WHERE email = $1
 	`, req.Email).Scan(&userID, &schemeID, &role, &name, &passwordHash, &active, &locked, &failedLogins)
 
@@ -74,7 +75,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		respondError(w, http.StatusLocked, "account is locked due to too many failed attempts. Contact admin to unlock.")
 		return
 	}
-	if err := auth.CheckPassword(req.Password, passwordHash); err != nil {
+	if err := auth.CheckPassword(passwordHash, req.Password); err != nil {
 		// Increment failed logins
 		newFailed := failedLogins + 1
 		if newFailed >= 5 {
@@ -112,7 +113,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		_, _ = s.db.ExecContext(r.Context(), `UPDATE system_users SET otp_code = NULL, otp_expiry = NULL WHERE id = $1`, userID)
 	}
 
-	accessToken, refreshToken, err := s.auth.GenerateToken(userID, schemeID, req.Email, role)
+	accessToken, refreshToken, err := s.auth.GenerateToken(userID, schemeID.String, req.Email, role)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, "failed to generate token")
 		return
@@ -125,7 +126,7 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 		"user_id":       userID,
 		"name":          name,
 		"role":          role,
-		"scheme_id":     schemeID,
+		"scheme_id":     schemeID.String,
 	})
 }
 
