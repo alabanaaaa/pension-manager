@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log/slog"
+	"testing"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -69,4 +70,19 @@ func maskURL(url string) string {
 		return url[:idx]
 	}
 	return "***"
+}
+
+// NewTestDB creates a test database connection for integration tests
+func NewTestDB(t testing.TB) *DB {
+	t.Helper()
+
+	// Use test database URL
+	testURL := "postgres://fatoumata@localhost:5432/minidb?sslmode=disable"
+
+	db, err := New(testURL)
+	if err != nil {
+		t.Skipf("Skipping integration test: database not available: %v", err)
+	}
+
+	return db
 }
