@@ -1,0 +1,189 @@
+<html>
+<head>
+    <title>Hospital Management</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">Hospital Management</h1>
+            <p class="text-gray-600">Manage hospital accounts and medical expenditures</p>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Pending Bills Alert -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Pending Bills</h3>
+                        <p class="text-sm text-gray-500">Requiring attention</p>
+                    </div>
+                    <div class="text-2xl font-bold text-red-600" id="pending-bills">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- High Urgency Bills -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">High Urgency</h3>
+                        <p class="text-sm text-gray-500">Over 60 days</p>
+                    </div>
+                    <div class="text-2xl font-bold text-red-500" id="high-urgency">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Pending Amount -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-900">Total Pending</h3>
+                        <p class="text-sm text-gray-500">Amount to be paid</p>
+                    </div>
+                    <div class="text-2xl font-bold text-green-600" id="total-pending">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-6 py-4 border-b">
+                <h2 class="text-xl font-semibold text-gray-800">Hospital Accounts</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="hospital-list">
+                        <tr>
+                            <td class="px-6 py-4 text-center text-gray-500" colspan="4">
+                                Loading hospitals...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch dashboard data
+        async function loadDashboardData() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // In a real implementation, we would get the scheme ID from user context
+                // For now, we'll use a placeholder
+                const schemeId = 'placeholder-scheme-id';
+                
+                const response = await fetch(`/api/medical-expenditures/alerts?scheme_id=${schemeId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch dashboard data');
+                }
+                
+                const data = await response.json();
+                
+                // Update dashboard
+                document.getElementById('pending-bills').textContent = data.pending_bills || 0;
+                document.getElementById('high-urgency').textContent = data.high_urgency_bills || 0;
+                document.getElementById('total-pending').textContent = 
+                    new Intl.NumberFormat('en-KE', { style: 'currency', currency: 'KES' }).format(data.total_pending_amount || 0);
+                    
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+                document.getElementById('pending-bills').textContent = 'Error';
+                document.getElementById('high-urgency').textContent = 'Error';
+                document.getElementById('total-pending').textContent = 'Error';
+            }
+        }
+
+        // Fetch hospital list
+        async function loadHospitalList() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (!token) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // In a real implementation, we would get the scheme ID from user context
+                const schemeId = 'placeholder-scheme-id';
+                
+                const response = await fetch(`/api/hospitals?scheme_id=${schemeId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch hospital list');
+                }
+                
+                const hospitals = await response.json();
+                
+                const hospitalList = document.getElementById('hospital-list');
+                if (hospitals.length === 0) {
+                    hospitalList.innerHTML = '<tr><td class="px-6 py-4 text-center text-gray-500" colspan="4">No hospitals found</td></tr>';
+                    return;
+                }
+
+                hospitalList.innerHTML = hospitals.map(hospital => `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            ${hospital.name || 'N/A'}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${hospital.status === 'active' ? 'bg-green-100 text-green-800' :
+                                  hospital.status === 'inactive' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${hospital.status || 'N/A'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            KES ${new Intl.NumberFormat('en-KE').format(hospital.account_balance || 0)}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <a href="/hospitals/${hospital.id}" class="text-indigo-600 hover:text-indigo-900">View</a>
+                        </td>
+                    </tr>
+                ).join('');
+                    
+            } catch (error) {
+                console.error('Error loading hospital list:', error);
+                document.getElementById('hospital-list').innerHTML = 
+                    '<tr><td class="px-6 py-4 text-center text-red-500" colspan="4">Error loading hospitals</td></tr>';
+            }
+        }
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboardData();
+            loadHospitalList();
+        });
+    </script>
+</body>
+</html>

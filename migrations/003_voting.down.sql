@@ -1,0 +1,5 @@
+-- Rollback 003: Online Voting System
+DROP TABLE IF EXISTS votes CASCADE;
+DROP TABLE IF EXISTS voter_register CASCADE;
+DROP TABLE IF EXISTS candidates CASCADE;
+DROP TABLE IF EXISTS elections CASCADE;
