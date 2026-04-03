@@ -37,9 +37,9 @@ export default function MembersPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Members</h1>
           <p className="text-neutral-500 mt-1">{total} total members</p>
@@ -82,12 +82,12 @@ export default function MembersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-neutral-50">
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden md:table-cell">Member No</th>
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden lg:table-cell">Department</th>
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
-                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Balance</th>
-                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Actions</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden md:table-cell">Member No</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden lg:table-cell">Department</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Balance</th>
+                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-50">
@@ -95,7 +95,7 @@ export default function MembersPage() {
                   const st = statusMap[member.membership_status] || { label: member.membership_status, cls: 'bg-neutral-50 text-neutral-600' };
                   return (
                     <tr key={member.id} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="px-6 py-4">
+                      <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 bg-neutral-100 rounded-full flex items-center justify-center text-neutral-600 font-medium text-xs flex-shrink-0">
                             {member.first_name?.[0]}{member.last_name?.[0]}
@@ -106,15 +106,15 @@ export default function MembersPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-6 py-4 hidden md:table-cell font-mono text-xs text-neutral-500">{member.member_no}</td>
-                      <td className="px-6 py-4 hidden lg:table-cell text-neutral-500">{member.department || '—'}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-8 py-5 hidden md:table-cell font-mono text-xs text-neutral-500">{member.member_no}</td>
+                      <td className="px-8 py-5 hidden lg:table-cell text-neutral-500">{member.department || '—'}</td>
+                      <td className="px-8 py-5">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
                       </td>
-                      <td className="px-6 py-4 text-right hidden sm:table-cell font-mono text-xs text-neutral-600">
+                      <td className="px-8 py-5 text-right hidden sm:table-cell font-mono text-xs text-neutral-600">
                         KES {((member.account_balance || 0) / 100).toLocaleString()}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-8 py-5 text-right">
                         <div className="flex items-center justify-end gap-1">
                           <Link to={`/members/${member.id}`} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors" title="View">
                             <Eye size={15} className="text-neutral-400" />
@@ -134,7 +134,7 @@ export default function MembersPage() {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-neutral-50 flex items-center justify-between">
+          <div className="px-8 py-5 border-t border-neutral-50 flex items-center justify-between">
             <p className="text-sm text-neutral-400">
               Showing {(page - 1) * limit + 1}–{Math.min(page * limit, total)} of {total}
             </p>

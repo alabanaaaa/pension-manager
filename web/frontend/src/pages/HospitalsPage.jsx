@@ -20,8 +20,8 @@ export default function HospitalsPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Hospitals</h1>
           <p className="text-neutral-500 mt-1">{hospitals.length} hospitals</p>
@@ -33,8 +33,8 @@ export default function HospitalsPage() {
 
       {/* Alerts */}
       {alerts && alerts.pending_bills > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-6">
-          <div className="flex items-center gap-4">
+        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-8">
+          <div className="flex items-center gap-8">
             <div className="p-3 bg-amber-100 rounded-xl">
               <AlertTriangle size={20} className="text-amber-600" />
             </div>
@@ -59,17 +59,17 @@ export default function HospitalsPage() {
           <Link to="/hospitals/new" className="text-sm text-neutral-900 font-medium hover:underline">Add one to get started</Link>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {hospitals.map(h => (
-            <Link key={h.id} to={`/hospitals/${h.id}`} className="btn-hover bg-white rounded-2xl border border-neutral-100 p-6 hover:shadow-sm transition-all">
-              <div className="flex items-start gap-4">
+            <Link key={h.id} to={`/hospitals/${h.id}`} className="btn-hover bg-white rounded-2xl border border-neutral-100 p-8 hover:shadow-sm transition-all">
+              <div className="flex items-start gap-8">
                 <div className="p-2.5 bg-neutral-50 rounded-xl flex-shrink-0">
                   <Hospital size={20} className="text-neutral-600" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-neutral-900 truncate">{h.name}</h3>
                   {h.address && <p className="text-sm text-neutral-400 mt-1">{h.address}</p>}
-                  <div className="flex items-center gap-4 mt-3 text-xs text-neutral-400">
+                  <div className="flex items-center gap-8 mt-3 text-xs text-neutral-400">
                     {h.phone && <span className="flex items-center gap-1"><Phone size={12} /> {h.phone}</span>}
                   </div>
                   <div className="mt-4 flex items-center justify-between">

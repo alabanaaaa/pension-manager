@@ -58,7 +58,7 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
@@ -72,7 +72,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {statCards.map((stat, i) => (
           <Link
             key={stat.label}
@@ -98,7 +98,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Quick actions */}
         <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-neutral-100">
           <div className="flex items-center justify-between mb-6">
@@ -167,7 +167,7 @@ export default function DashboardPage() {
       )}
 
       {/* Bottom stats row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white rounded-2xl p-6 border border-neutral-100">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Scheme Overview</h2>

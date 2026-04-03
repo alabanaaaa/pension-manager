@@ -22,8 +22,8 @@ export default function VotingPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Elections</h1>
           <p className="text-neutral-500 mt-1">{elections.length} elections</p>
@@ -41,19 +41,19 @@ export default function VotingPage() {
           <Link to="/voting/new" className="text-sm text-neutral-900 font-medium hover:underline">Create one to get started</Link>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-8">
           {elections.map(e => {
             const st = statusMap[e.status] || { label: e.status, cls: 'bg-neutral-50 text-neutral-600' };
             return (
-              <div key={e.id} className="bg-white rounded-2xl border border-neutral-100 p-6 hover:shadow-sm transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+              <div key={e.id} className="bg-white rounded-2xl border border-neutral-100 p-8 hover:shadow-sm transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <h3 className="text-lg font-semibold tracking-tight text-neutral-900">{e.title}</h3>
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
                     </div>
                     {e.description && <p className="text-sm text-neutral-400 mt-1">{e.description}</p>}
-                    <div className="flex gap-6 mt-3 text-sm text-neutral-400">
+                    <div className="flex gap-8 mt-3 text-sm text-neutral-400">
                       <span className="flex items-center gap-1.5"><Users size={14} /> {e.total_voters} voters</span>
                       <span className="flex items-center gap-1.5"><CheckCircle size={14} /> {e.total_votes} votes</span>
                       <span className="flex items-center gap-1.5"><Clock size={14} /> Max {e.max_candidates} votes</span>

@@ -30,8 +30,8 @@ export default function ContributionsPage() {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div className="space-y-8">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Contributions</h1>
           <p className="text-neutral-500 mt-1">{data.length} records</p>
@@ -48,7 +48,7 @@ export default function ContributionsPage() {
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div className="bg-white rounded-2xl border border-neutral-100 p-6">
+        <div className="bg-white rounded-2xl border border-neutral-100 p-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Monthly Trends</h2>
           </div>
@@ -76,25 +76,25 @@ export default function ContributionsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-neutral-50">
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
-                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee</th>
-                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer</th>
-                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">AVC</th>
-                  <th className="text-right px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Total</th>
-                  <th className="text-left px-6 py-3.5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
+                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee</th>
+                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer</th>
+                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">AVC</th>
+                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Total</th>
+                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-50">
                 {data.slice(0, 20).map(c => (
                   <tr key={c.id} className="hover:bg-neutral-50/50 transition-colors">
-                    <td className="px-6 py-4 text-neutral-500">{new Date(c.period).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 font-medium text-neutral-900">{c.member_name || c.member_id}</td>
-                    <td className="px-6 py-4 text-right font-mono text-xs text-neutral-600">KES {((c.employee_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-mono text-xs text-neutral-600">KES {((c.employer_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-mono text-xs text-neutral-600 hidden sm:table-cell">KES {((c.avc_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-6 py-4 text-right font-mono text-xs font-semibold text-neutral-900">KES {((c.total_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-8 py-5 text-neutral-500">{new Date(c.period).toLocaleDateString()}</td>
+                    <td className="px-8 py-5 font-medium text-neutral-900">{c.member_name || c.member_id}</td>
+                    <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600">KES {((c.employee_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600">KES {((c.employer_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600 hidden sm:table-cell">KES {((c.avc_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-8 py-5 text-right font-mono text-xs font-semibold text-neutral-900">KES {((c.total_amount || 0) / 100).toLocaleString()}</td>
+                    <td className="px-8 py-5">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${c.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{c.status}</span>
                     </td>
                   </tr>
