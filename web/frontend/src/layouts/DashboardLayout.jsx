@@ -140,7 +140,7 @@ export default function DashboardLayout() {
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Topbar */}
-        <header className="h-[60px] border-b border-neutral-100 flex items-center justify-between px-4 lg:px-6 bg-white sticky top-0 z-20">
+        <header className="h-[60px] border-b border-neutral-100 flex items-center justify-between px-6 lg:px-10 bg-white sticky top-0 z-20">
           <div className="flex items-center gap-4">
             {/* Bank logo - click to open sidebar */}
             <button
@@ -175,7 +175,7 @@ export default function DashboardLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6 lg:p-8 overflow-auto">
+        <main className="flex-1 p-8 lg:p-12 overflow-auto">
           <Outlet />
         </main>
       </div>
