@@ -18,6 +18,13 @@ import SMSPage from './pages/SMSPage';
 import NewsPage from './pages/NewsPage';
 import SecurityPage from './pages/SecurityPage';
 import SettingsPage from './pages/SettingsPage';
+import PortalDashboardPage from './pages/PortalDashboardPage';
+import PortalProfilePage from './pages/PortalProfilePage';
+import PortalContributionsPage from './pages/PortalContributionsPage';
+import PortalClaimsPage from './pages/PortalClaimsPage';
+import PortalVotingPage from './pages/PortalVotingPage';
+import PortalProjectionsPage from './pages/PortalProjectionsPage';
+import PortalFeedbackPage from './pages/PortalFeedbackPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 
 function ProtectedRoute({ children }) {
@@ -61,14 +68,14 @@ function AppRoutes() {
         <Route path="security" element={<SecurityPage />} />
         <Route path="settings" element={<SettingsPage />} />
         {/* Member Portal */}
-        <Route path="portal" element={<PlaceholderPage title="My Dashboard" description="Member portal dashboard" />} />
-        <Route path="portal/profile" element={<PlaceholderPage title="My Profile" description="View and update profile" />} />
-        <Route path="portal/contributions" element={<PlaceholderPage title="My Contributions" description="View contribution history" />} />
-        <Route path="portal/claims" element={<PlaceholderPage title="My Claims" description="View claim status" />} />
-        <Route path="portal/voting" element={<PlaceholderPage title="Vote" description="Cast your vote" />} />
-        <Route path="portal/projections" element={<PlaceholderPage title="Benefit Projections" description="Project retirement benefits" />} />
-        <Route path="portal/feedback" element={<PlaceholderPage title="Feedback" description="Submit feedback" />} />
-        <Route path="portal/settings" element={<PlaceholderPage title="Settings" description="Account settings" />} />
+        <Route path="portal" element={<PortalDashboardPage />} />
+        <Route path="portal/profile" element={<PortalProfilePage />} />
+        <Route path="portal/contributions" element={<PortalContributionsPage />} />
+        <Route path="portal/claims" element={<PortalClaimsPage />} />
+        <Route path="portal/voting" element={<PortalVotingPage />} />
+        <Route path="portal/projections" element={<PortalProjectionsPage />} />
+        <Route path="portal/feedback" element={<PortalFeedbackPage />} />
+        <Route path="portal/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
