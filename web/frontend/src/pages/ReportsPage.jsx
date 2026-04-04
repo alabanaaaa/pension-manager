@@ -31,7 +31,7 @@ export default function ReportsPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Reports</h1>
@@ -60,7 +60,7 @@ export default function ReportsPage() {
       ) : (
         <>
           {activeTab === 'breakdown' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div className="bg-white rounded-xl border border-[#e8e9eb] p-5">
                 <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Monthly Breakdown</h2>
                 {breakdown.length > 0 ? (

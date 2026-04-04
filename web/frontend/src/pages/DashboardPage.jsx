@@ -5,7 +5,7 @@ import {
   Users, CreditCard, FileText, Vote, TrendingUp,
   AlertTriangle, CheckCircle, Clock, ArrowUpRight,
   ArrowDownRight, Activity, Building2, Shield,
-  ChevronRight, BarChart3, Calendar
+  ChevronRight, Calendar
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -34,12 +34,12 @@ export default function DashboardPage() {
   ];
 
   const colorMap = {
-    blue: 'bg-blue-50 text-blue-600',
-    emerald: 'bg-emerald-50 text-emerald-600',
-    violet: 'bg-violet-50 text-violet-600',
-    amber: 'bg-amber-50 text-amber-600',
-    sky: 'bg-sky-50 text-sky-600',
-    rose: 'bg-rose-50 text-rose-600',
+    blue: { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'text-blue-600' },
+    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'text-emerald-600' },
+    violet: { bg: 'bg-violet-50', text: 'text-violet-600', icon: 'text-violet-600' },
+    amber: { bg: 'bg-amber-50', text: 'text-amber-600', icon: 'text-amber-600' },
+    sky: { bg: 'bg-sky-50', text: 'text-sky-600', icon: 'text-sky-600' },
+    rose: { bg: 'bg-rose-50', text: 'text-rose-600', icon: 'text-rose-600' },
   };
 
   const recentActivity = [
@@ -58,62 +58,63 @@ export default function DashboardPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-end justify-between">
+      <div className="flex items-end justify-between animate-fade-in-up">
         <div>
-          <h1 className="text-[1.1rem] font-semibold tracking-tight text-neutral-900">Dashboard</h1>
-          <p className="text-sm text-neutral-500 mt-0.5">Overview of your pension management system</p>
+          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Dashboard</h1>
+          <p className="text-neutral-500 mt-2 text-base">Overview of your pension management system</p>
         </div>
-        <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <Calendar size={13} />
+        <div className="flex items-center gap-2 text-sm text-neutral-400">
+          <Calendar size={14} />
           <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {statCards.map((stat, i) => (
           <Link
             key={stat.label}
             to={stat.href}
-            className="btn-hover group bg-white rounded-xl p-5 hover:shadow-sm border border-neutral-200 transition-all"
+            className="btn-hover group bg-white rounded-2xl p-6 hover:shadow-sm border border-neutral-100 transition-all animate-fade-in-up"
             style={{ animationDelay: `${i * 0.05}s` }}
           >
-            <div className="flex items-start justify-between mb-3">
-              <div className={`p-2 rounded-lg ${colorMap[stat.color]}`}>
-                <stat.icon size={18} />
+            <div className="flex items-start justify-between mb-4">
+              <div className={`p-2.5 rounded-xl ${colorMap[stat.color].bg}`}>
+                <stat.icon size={20} className={colorMap[stat.color].icon} />
               </div>
               {stat.change !== undefined && (
-                <div className={`flex items-center gap-0.5 text-[0.6875rem] font-medium px-2 py-0.5 rounded-full ${stat.change >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                  {stat.change >= 0 ? <ArrowUpRight size={11} /> : <ArrowDownRight size={11} />}
+                <div className={`flex items-center gap-0.5 text-xs font-medium px-2.5 py-1 rounded-full ${stat.change >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                  {stat.change >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
                   {Math.abs(stat.change)}%
                 </div>
               )}
             </div>
-            <p className="text-[0.75rem] font-medium text-neutral-500">{stat.label}</p>
-            <p className="text-[1.625rem] font-bold tracking-tight text-neutral-900 mt-1 leading-none">{loading ? '—' : stat.value}</p>
+            <p className="text-sm text-neutral-500">{stat.label}</p>
+            <p className="text-2xl font-semibold tracking-tight text-neutral-900 mt-1">{loading ? '—' : stat.value}</p>
           </Link>
         ))}
       </div>
 
       {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Quick actions */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-neutral-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-[18px] border-b border-neutral-200">
-            <h2 className="text-[0.8125rem] font-semibold tracking-tight text-neutral-900">Quick Actions</h2>
-            <ChevronRight size={15} className="text-neutral-300" />
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
+            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Quick Actions</h2>
+            <ChevronRight size={16} className="text-neutral-300" />
           </div>
-          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {quickLinks.map((action) => (
+          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {quickLinks.map((action, i) => (
               <Link
                 key={action.label}
                 to={action.href}
-                className="btn-hover group flex items-start gap-3.5 p-4 rounded-lg bg-neutral-50 hover:bg-neutral-100 transition-all"
+                className="btn-hover group flex items-start gap-4 p-5 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-all animate-fade-in-up"
+                style={{ animationDelay: `${0.35 + i * 0.05}s` }}
               >
-                <div className={`p-2 rounded-lg ${colorMap[action.color]} flex-shrink-0`}>
-                  <action.icon size={16} />
+                <div className={`p-2.5 rounded-xl ${colorMap[action.color].bg} flex-shrink-0`}>
+                  <action.icon size={18} className={colorMap[action.color].icon} />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-neutral-900">{action.label}</p>
@@ -125,16 +126,16 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent activity */}
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-[18px] border-b border-neutral-200">
-            <h2 className="text-[0.8125rem] font-semibold tracking-tight text-neutral-900">Recent Activity</h2>
-            <ChevronRight size={15} className="text-neutral-300" />
+        <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
+            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Recent Activity</h2>
+            <ChevronRight size={16} className="text-neutral-300" />
           </div>
-          <div className="p-5 space-y-4">
+          <div className="p-6 space-y-5">
             {recentActivity.map((item, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className={`p-1.5 rounded-lg ${colorMap[item.color]} flex-shrink-0 mt-0.5`}>
-                  <item.icon size={13} />
+              <div key={i} className="flex items-start gap-3 animate-fade-in-up" style={{ animationDelay: `${0.45 + i * 0.05}s` }}>
+                <div className={`p-2 rounded-lg ${colorMap[item.color].bg} flex-shrink-0 mt-0.5`}>
+                  <item.icon size={14} className={colorMap[item.color].icon} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-neutral-700 truncate">{item.label}</p>
@@ -148,18 +149,18 @@ export default function DashboardPage() {
 
       {/* Pending approvals alert */}
       {pendingCount && pendingCount.total > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
+        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-6 animate-fade-in-up">
           <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-amber-100 rounded-lg">
-              <AlertTriangle size={18} className="text-amber-600" />
+            <div className="p-3 bg-amber-100 rounded-xl">
+              <AlertTriangle size={20} className="text-amber-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-amber-900">Pending Approvals</h3>
-              <p className="text-xs text-amber-600 mt-0.5">
+              <h3 className="font-medium text-amber-900">Pending Approvals</h3>
+              <p className="text-sm text-amber-600 mt-0.5">
                 {pendingCount.members} member changes · {pendingCount.beneficiaries} beneficiary changes · {pendingCount.claims} claim changes
               </p>
             </div>
-            <Link to="/maker-checker" className="btn-hover px-4 py-2 bg-amber-600 text-white rounded-lg text-xs font-medium hover:bg-amber-700 transition-all flex-shrink-0">
+            <Link to="/maker-checker" className="btn-hover px-5 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-all flex-shrink-0">
               Review All
             </Link>
           </div>
@@ -167,20 +168,20 @@ export default function DashboardPage() {
       )}
 
       {/* Bottom stats row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-[18px] border-b border-neutral-200">
-            <h2 className="text-[0.8125rem] font-semibold tracking-tight text-neutral-900">Scheme Overview</h2>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
+            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Scheme Overview</h2>
           </div>
-          <div className="px-5 py-4 space-y-0">
+          <div className="px-6 py-4 space-y-0">
             {[
               { label: 'DB Scheme Members', value: '—', icon: Building2 },
               { label: 'DC Scheme Members', value: '—', icon: Building2 },
               { label: 'Medical Fund Members', value: '—', icon: Activity },
             ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-3.5 border-b border-neutral-100 last:border-0">
+              <div key={i} className="flex items-center justify-between py-4 border-b border-neutral-50 last:border-0">
                 <div className="flex items-center gap-3">
-                  <item.icon size={15} className="text-neutral-400" />
+                  <item.icon size={16} className="text-neutral-400" />
                   <span className="text-sm text-neutral-600">{item.label}</span>
                 </div>
                 <span className="text-sm font-medium text-neutral-900">{item.value}</span>
@@ -189,21 +190,21 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-[18px] border-b border-neutral-200">
-            <h2 className="text-[0.8125rem] font-semibold tracking-tight text-neutral-900">System Status</h2>
+        <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.55s' }}>
+          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
+            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">System Status</h2>
           </div>
-          <div className="px-5 py-4 space-y-0">
+          <div className="px-6 py-4 space-y-0">
             {[
               { label: 'Database', status: 'Connected', ok: true },
               { label: 'M-Pesa Integration', status: 'Sandbox', ok: true },
               { label: 'SMS Gateway', status: 'Mock Mode', ok: true },
               { label: 'News API', status: 'Mock Mode', ok: true },
             ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-3.5 border-b border-neutral-100 last:border-0">
+              <div key={i} className="flex items-center justify-between py-4 border-b border-neutral-50 last:border-0">
                 <span className="text-sm text-neutral-600">{item.label}</span>
                 <div className="flex items-center gap-2">
-                  <div className={`w-1.5 h-1.5 rounded-full ${item.ok ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                  <div className={`w-2 h-2 rounded-full ${item.ok ? 'bg-emerald-500' : 'bg-red-500'} animate-pulse`} />
                   <span className="text-sm text-neutral-500">{item.status}</span>
                 </div>
               </div>
