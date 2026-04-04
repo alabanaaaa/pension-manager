@@ -9,11 +9,16 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests
+// Add auth token and scheme_id to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+  }
+  // Add scheme_id from stored user if not already in params
+  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  if (user.scheme_id && !config.params?.scheme_id) {
+    config.params = { ...config.params, scheme_id: user.scheme_id };
   }
   return config;
 });
