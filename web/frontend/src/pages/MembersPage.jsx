@@ -45,10 +45,10 @@ export default function MembersPage() {
           <p className="text-neutral-500 mt-1">{total} total members</p>
         </div>
         <div className="flex gap-2">
-          <Link to="/bulk/import" className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-all">
+          <Link to="/bulk/import" className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-2xl text-sm font-medium hover:bg-neutral-50 transition-all">
             <Upload size={15} /> Import
           </Link>
-          <Link to="/members/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-all">
+          <Link to="/members/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-2xl text-sm font-medium hover:bg-neutral-800 transition-all">
             <Plus size={15} /> Add Member
           </Link>
         </div>
@@ -62,12 +62,12 @@ export default function MembersPage() {
           placeholder="Search by name, member number, ID..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-          className="w-full pl-9 pr-4 py-3 bg-white border border-neutral-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-all placeholder:text-neutral-300"
+          className="w-full pl-9 pr-4 py-3 bg-white border border-neutral-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-neutral-900/10 focus:border-neutral-900 transition-all placeholder:text-neutral-300"
         />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
         {loading ? (
           <div className="p-16 text-center">
             <Loader2 size={24} className="animate-spin mx-auto text-neutral-300" />

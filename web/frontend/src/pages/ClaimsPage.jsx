@@ -33,7 +33,7 @@ export default function ClaimsPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Claims</h1>
           <p className="text-neutral-500 mt-1">{data.length} claims</p>
         </div>
-        <Link to="/claims/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-all">
+        <Link to="/claims/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-2xl text-sm font-medium hover:bg-neutral-800 transition-all">
           <Plus size={15} /> New Claim
         </Link>
       </div>
@@ -44,7 +44,7 @@ export default function ClaimsPage() {
           <button
             key={s}
             onClick={() => setStatusFilter(s)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${statusFilter === s ? 'bg-neutral-900 text-white' : 'bg-white border border-neutral-200 text-neutral-500 hover:bg-neutral-50'}`}
+            className={`px-4 py-2 rounded-2xl text-sm font-medium transition-all ${statusFilter === s ? 'bg-neutral-900 text-white' : 'bg-white border border-neutral-200 text-neutral-500 hover:bg-neutral-50'}`}
           >
             {filterLabels[s]}
           </button>
@@ -52,7 +52,7 @@ export default function ClaimsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
         {loading ? (
           <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
         ) : data.length === 0 ? (

@@ -26,16 +26,16 @@ export default function HospitalsPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Hospitals</h1>
           <p className="text-neutral-500 mt-1">{hospitals.length} hospitals</p>
         </div>
-        <Link to="/hospitals/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-all">
+        <Link to="/hospitals/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-2xl text-sm font-medium hover:bg-neutral-800 transition-all">
           <Plus size={15} /> Add Hospital
         </Link>
       </div>
 
       {/* Alerts */}
       {alerts && alerts.pending_bills > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-xl p-5">
+        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5">
           <div className="flex items-center gap-5">
-            <div className="p-3 bg-amber-100 rounded-xl">
+            <div className="p-3 bg-amber-100 rounded-2xl">
               <AlertTriangle size={20} className="text-amber-600" />
             </div>
             <div className="flex-1">
@@ -44,7 +44,7 @@ export default function HospitalsPage() {
                 {alerts.high_urgency_bills} high urgency · Total: KES {(alerts.total_pending_amount / 100).toLocaleString()}
               </p>
             </div>
-            <Link to="/medical-expenditures" className="btn-hover px-5 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-all">
+            <Link to="/medical-expenditures" className="btn-hover px-5 py-2.5 bg-amber-600 text-white rounded-2xl text-sm font-medium hover:bg-amber-700 transition-all">
               View Bills
             </Link>
           </div>
@@ -54,16 +54,16 @@ export default function HospitalsPage() {
       {loading ? (
         <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
       ) : hospitals.length === 0 ? (
-        <div className="bg-white rounded-xl border border-[#e8e9eb] p-16 text-center">
+        <div className="bg-white rounded-2xl border border-[#e8e9eb] p-16 text-center">
           <p className="text-sm text-neutral-400 mb-4">No hospitals yet</p>
           <Link to="/hospitals/new" className="text-sm text-neutral-900 font-medium hover:underline">Add one to get started</Link>
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {hospitals.map(h => (
-            <Link key={h.id} to={`/hospitals/${h.id}`} className="btn-hover bg-white rounded-xl border border-[#e8e9eb] p-5 hover:shadow-sm transition-all">
+            <Link key={h.id} to={`/hospitals/${h.id}`} className="btn-hover bg-white rounded-2xl border border-[#e8e9eb] p-5 hover:shadow-sm transition-all">
               <div className="flex items-start gap-5">
-                <div className="p-2.5 bg-neutral-50 rounded-xl flex-shrink-0">
+                <div className="p-2.5 bg-neutral-50 rounded-2xl flex-shrink-0">
                   <Hospital size={20} className="text-neutral-600" />
                 </div>
                 <div className="flex-1 min-w-0">

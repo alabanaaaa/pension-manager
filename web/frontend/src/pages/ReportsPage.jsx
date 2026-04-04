@@ -37,12 +37,12 @@ export default function ReportsPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Reports</h1>
           <p className="text-neutral-500 mt-1">Contribution analysis and trends</p>
         </div>
-        <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-all">
+        <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-2xl text-sm font-medium hover:bg-neutral-50 transition-all">
           <Download size={15} /> Export
         </button>
       </div>
 
-      <div className="flex gap-1 bg-neutral-100 p-1 rounded-xl w-fit">
+      <div className="flex gap-1 bg-neutral-100 p-1 rounded-2xl w-fit">
         {tabs.map(tab => (
           <button
             key={tab.id}
@@ -61,7 +61,7 @@ export default function ReportsPage() {
         <>
           {activeTab === 'breakdown' && (
             <div className="space-y-8">
-              <div className="bg-white rounded-xl border border-[#e8e9eb] p-5">
+              <div className="bg-white rounded-2xl border border-[#e8e9eb] p-5">
                 <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Monthly Breakdown</h2>
                 {breakdown.length > 0 ? (
                   <ResponsiveContainer width="100%" height={280}>
@@ -76,7 +76,7 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 ) : <p className="text-neutral-400 text-center py-12">No data available</p>}
               </div>
-              <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
+              <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-neutral-50">
@@ -104,7 +104,7 @@ export default function ReportsPage() {
           )}
 
           {activeTab === 'trends' && (
-            <div className="bg-white rounded-xl border border-[#e8e9eb] p-5">
+            <div className="bg-white rounded-2xl border border-[#e8e9eb] p-5">
               <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Contribution Trends</h2>
               {trends.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
@@ -121,7 +121,7 @@ export default function ReportsPage() {
           )}
 
           {activeTab === 'ytd' && (
-            <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
+            <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-neutral-50">

@@ -37,10 +37,10 @@ export default function ContributionsPage() {
           <p className="text-neutral-500 mt-1">{data.length} records</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-xl text-sm font-medium hover:bg-neutral-50 transition-all">
+          <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-2xl text-sm font-medium hover:bg-neutral-50 transition-all">
             <Download size={15} /> Export
           </button>
-          <Link to="/contributions/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium hover:bg-neutral-800 transition-all">
+          <Link to="/contributions/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-2xl text-sm font-medium hover:bg-neutral-800 transition-all">
             <Plus size={15} /> Record
           </Link>
         </div>
@@ -48,7 +48,7 @@ export default function ContributionsPage() {
 
       {/* Chart */}
       {chartData.length > 0 && (
-        <div className="bg-white rounded-xl border border-[#e8e9eb] p-5">
+        <div className="bg-white rounded-2xl border border-[#e8e9eb] p-5">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Monthly Trends</h2>
           </div>
@@ -66,7 +66,7 @@ export default function ContributionsPage() {
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
         {loading ? (
           <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
         ) : data.length === 0 ? (
