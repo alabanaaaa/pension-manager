@@ -18,9 +18,11 @@ export default function MembersPage() {
     setLoading(true);
     try {
       const res = await members.list({ search, limit, offset: (page - 1) * limit });
-      setData(res.data.members || []);
-      setTotal(res.data.total || 0);
-    } catch { setData([]); }
+      const data = Array.isArray(res.data) ? res.data : (res.data?.members || []);
+      setData(data);
+      setTotal(res.data?.total || data.length);
+      setActiveCount(data.filter(m => m.membership_status === 'active').length);
+    } catch { setData([]); setTotal(0); setActiveCount(0); }
     finally { setLoading(false); }
   }, [search, page]);
 

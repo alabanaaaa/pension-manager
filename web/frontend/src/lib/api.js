@@ -16,9 +16,14 @@ api.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${token}`;
   }
   // Add scheme_id from stored user if not already in params
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
-  if (user.scheme_id && !config.params?.scheme_id) {
-    config.params = { ...config.params, scheme_id: user.scheme_id };
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const schemeId = typeof user.scheme_id === 'string' ? user.scheme_id : (user.scheme_id?.String || '');
+    if (schemeId && !config.params?.scheme_id) {
+      config.params = { ...config.params, scheme_id: schemeId };
+    }
+  } catch {
+    // ignore parse errors
   }
   return config;
 });
@@ -28,9 +33,13 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
-      window.location.href = '/login';
+      // Only redirect if not already on login page
+      if (!window.location.pathname.includes('/login')) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

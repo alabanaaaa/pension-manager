@@ -10,11 +10,11 @@ export default function HospitalsPage() {
 
   useEffect(() => {
     Promise.all([
-      hospitals.list().catch(() => []),
-      hospitals.getAlerts().catch(() => null),
+      hospitals.list().then(res => res.data || []).catch(() => []),
+      hospitals.getAlerts().then(res => res.data || null).catch(() => null),
     ]).then(([h, a]) => {
-      setHospitals(h.data || []);
-      setAlerts(a?.data);
+      setHospitals(Array.isArray(h) ? h : []);
+      setAlerts(a);
       setLoading(false);
     });
   }, []);
