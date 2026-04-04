@@ -27,8 +27,8 @@ export default function ClaimsPage() {
   const filterLabels = { '': 'All', submitted: 'Pending', accepted: 'Accepted', rejected: 'Rejected', paid: 'Paid' };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Claims</h1>
           <p className="text-neutral-500 mt-1">{data.length} claims</p>
@@ -52,7 +52,7 @@ export default function ClaimsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
         {loading ? (
           <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
         ) : data.length === 0 ? (
@@ -62,13 +62,13 @@ export default function ClaimsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-neutral-50">
-                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Claim No</th>
-                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
-                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Type</th>
-                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden md:table-cell">Date</th>
-                  <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
-                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Amount</th>
-                  <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Actions</th>
+                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Claim No</th>
+                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
+                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Type</th>
+                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider hidden md:table-cell">Date</th>
+                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
+                  <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">Amount</th>
+                  <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-50">
@@ -76,17 +76,17 @@ export default function ClaimsPage() {
                   const cfg = statusConfig[c.status] || { label: c.status, cls: 'bg-neutral-50 text-neutral-600', icon: Clock };
                   return (
                     <tr key={c.id} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="px-8 py-5 font-mono text-xs text-neutral-500">{c.claim_form_no}</td>
-                      <td className="px-8 py-5 font-medium text-neutral-900">{c.member_name || c.member_id}</td>
-                      <td className="px-8 py-5 text-neutral-500 capitalize hidden sm:table-cell">{c.claim_type}</td>
-                      <td className="px-8 py-5 text-neutral-400 text-xs hidden md:table-cell">{new Date(c.date_of_claim).toLocaleDateString()}</td>
-                      <td className="px-8 py-5">
+                      <td className="px-5 py-[18px] font-mono text-xs text-neutral-500">{c.claim_form_no}</td>
+                      <td className="px-5 py-[18px] font-medium text-neutral-900">{c.member_name || c.member_id}</td>
+                      <td className="px-5 py-[18px] text-neutral-500 capitalize hidden sm:table-cell">{c.claim_type}</td>
+                      <td className="px-5 py-[18px] text-neutral-400 text-xs hidden md:table-cell">{new Date(c.date_of_claim).toLocaleDateString()}</td>
+                      <td className="px-5 py-[18px]">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${cfg.cls}`}>{cfg.label}</span>
                       </td>
-                      <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600 hidden sm:table-cell">
+                      <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600 hidden sm:table-cell">
                         {c.amount ? `KES ${(c.amount / 100).toLocaleString()}` : '—'}
                       </td>
-                      <td className="px-8 py-5 text-right">
+                      <td className="px-5 py-[18px] text-right">
                         <Link to={`/claims/${c.id}`} className="p-2 hover:bg-neutral-100 rounded-lg transition-colors inline-flex">
                           <Eye size={15} className="text-neutral-400" />
                         </Link>

@@ -22,8 +22,8 @@ export default function VotingPage() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Elections</h1>
           <p className="text-neutral-500 mt-1">{elections.length} elections</p>
@@ -36,24 +36,24 @@ export default function VotingPage() {
       {loading ? (
         <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
       ) : elections.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-neutral-100 p-16 text-center">
+        <div className="bg-white rounded-xl border border-[#e8e9eb] p-16 text-center">
           <p className="text-sm text-neutral-400 mb-4">No elections yet</p>
           <Link to="/voting/new" className="text-sm text-neutral-900 font-medium hover:underline">Create one to get started</Link>
         </div>
       ) : (
-        <div className="grid gap-8">
+        <div className="grid gap-5">
           {elections.map(e => {
             const st = statusMap[e.status] || { label: e.status, cls: 'bg-neutral-50 text-neutral-600' };
             return (
-              <div key={e.id} className="bg-white rounded-2xl border border-neutral-100 p-8 hover:shadow-sm transition-all">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-8">
+              <div key={e.id} className="bg-white rounded-xl border border-[#e8e9eb] p-5 hover:shadow-sm transition-all">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-5">
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
                       <h3 className="text-lg font-semibold tracking-tight text-neutral-900">{e.title}</h3>
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${st.cls}`}>{st.label}</span>
                     </div>
                     {e.description && <p className="text-sm text-neutral-400 mt-1">{e.description}</p>}
-                    <div className="flex gap-8 mt-3 text-sm text-neutral-400">
+                    <div className="flex gap-5 mt-3 text-sm text-neutral-400">
                       <span className="flex items-center gap-1.5"><Users size={14} /> {e.total_voters} voters</span>
                       <span className="flex items-center gap-1.5"><CheckCircle size={14} /> {e.total_votes} votes</span>
                       <span className="flex items-center gap-1.5"><Clock size={14} /> Max {e.max_candidates} votes</span>

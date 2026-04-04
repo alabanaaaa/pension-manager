@@ -31,8 +31,8 @@ export default function ReportsPage() {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-8">
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Reports</h1>
           <p className="text-neutral-500 mt-1">Contribution analysis and trends</p>
@@ -60,8 +60,8 @@ export default function ReportsPage() {
       ) : (
         <>
           {activeTab === 'breakdown' && (
-            <div className="space-y-8">
-              <div className="bg-white rounded-2xl border border-neutral-100 p-8">
+            <div className="space-y-6">
+              <div className="bg-white rounded-xl border border-[#e8e9eb] p-5">
                 <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Monthly Breakdown</h2>
                 {breakdown.length > 0 ? (
                   <ResponsiveContainer width="100%" height={280}>
@@ -76,25 +76,25 @@ export default function ReportsPage() {
                   </ResponsiveContainer>
                 ) : <p className="text-neutral-400 text-center py-12">No data available</p>}
               </div>
-              <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
+              <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-neutral-50">
-                      <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
-                      <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employees</th>
-                      <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee Total</th>
-                      <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer Total</th>
-                      <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Grand Total</th>
+                      <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
+                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employees</th>
+                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee Total</th>
+                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer Total</th>
+                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Grand Total</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-50">
                     {breakdown.map((b, i) => (
                       <tr key={i} className="hover:bg-neutral-50/50 transition-colors">
-                        <td className="px-8 py-5 font-medium text-neutral-900">{b.period}</td>
-                        <td className="px-8 py-5 text-right text-neutral-500">{b.employee_count}</td>
-                        <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600">KES {(b.employee_total / 100).toLocaleString()}</td>
-                        <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600">KES {(b.employer_total / 100).toLocaleString()}</td>
-                        <td className="px-8 py-5 text-right font-mono text-xs font-semibold text-neutral-900">KES {(b.grand_total / 100).toLocaleString()}</td>
+                        <td className="px-5 py-[18px] font-medium text-neutral-900">{b.period}</td>
+                        <td className="px-5 py-[18px] text-right text-neutral-500">{b.employee_count}</td>
+                        <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(b.employee_total / 100).toLocaleString()}</td>
+                        <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(b.employer_total / 100).toLocaleString()}</td>
+                        <td className="px-5 py-[18px] text-right font-mono text-xs font-semibold text-neutral-900">KES {(b.grand_total / 100).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -104,7 +104,7 @@ export default function ReportsPage() {
           )}
 
           {activeTab === 'trends' && (
-            <div className="bg-white rounded-2xl border border-neutral-100 p-8">
+            <div className="bg-white rounded-xl border border-[#e8e9eb] p-5">
               <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Contribution Trends</h2>
               {trends.length > 0 ? (
                 <ResponsiveContainer width="100%" height={280}>
@@ -121,23 +121,23 @@ export default function ReportsPage() {
           )}
 
           {activeTab === 'ytd' && (
-            <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden">
+            <div className="bg-white rounded-xl border border-[#e8e9eb] overflow-hidden">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-neutral-50">
-                    <th className="text-left px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
-                    <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee YTD</th>
-                    <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer YTD</th>
-                    <th className="text-right px-8 py-5 font-medium text-neutral-400 text-xs uppercase tracking-wider">Total YTD</th>
+                    <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
+                    <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee YTD</th>
+                    <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer YTD</th>
+                    <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Total YTD</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutral-50">
                   {ytd.slice(0, 20).map((y, i) => (
                     <tr key={i} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="px-8 py-5 font-medium text-neutral-900">{y.full_name}</td>
-                      <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600">KES {(y.employee_ytd / 100).toLocaleString()}</td>
-                      <td className="px-8 py-5 text-right font-mono text-xs text-neutral-600">KES {(y.employer_ytd / 100).toLocaleString()}</td>
-                      <td className="px-8 py-5 text-right font-mono text-xs font-semibold text-neutral-900">KES {(y.total_ytd / 100).toLocaleString()}</td>
+                      <td className="px-5 py-[18px] font-medium text-neutral-900">{y.full_name}</td>
+                      <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(y.employee_ytd / 100).toLocaleString()}</td>
+                      <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(y.employer_ytd / 100).toLocaleString()}</td>
+                      <td className="px-5 py-[18px] text-right font-mono text-xs font-semibold text-neutral-900">KES {(y.total_ytd / 100).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>

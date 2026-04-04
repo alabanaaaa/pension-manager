@@ -1,22 +1,23 @@
 @import "tailwindcss";
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --success: 142.1 76.2% 36.3%;
-  --warning: 38 92% 50%;
-  --danger: 0 84.2% 60.2%;
+  --white: #ffffff;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e8e9eb;
+  --text: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --green: #82b440;
+  --green-dark: #6a9a2e;
+  --green-light: #e8f5d8;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  --font: 'Inter', -apple-system, sans-serif;
 }
 
 * {
@@ -26,12 +27,13 @@
 }
 
 body {
-  font-family: system-ui, -apple-system, sans-serif;
-  background: #fafafa;
-  color: #171717;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 0.875rem;
 }
 
 #root {
@@ -40,7 +42,7 @@ body {
 
 /* Animations */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -50,39 +52,39 @@ body {
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(12px); }
+  from { opacity: 0; transform: translateX(8px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes pulse-soft {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+  50% { opacity: 0.6; }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6px); }
+  50% { transform: translateY(-4px); }
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.5s ease-out both;
+  animation: fadeInUp 0.35s ease-out both;
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease-out both;
+  animation: fadeIn 0.25s ease-out both;
 }
 
 .animate-scale-in {
-  animation: scaleIn 0.4s ease-out both;
+  animation: scaleIn 0.35s ease-out both;
 }
 
 .animate-slide-in {
-  animation: slideInRight 0.35s ease-out both;
+  animation: slideInRight 0.3s ease-out both;
 }
 
 .animate-float {
@@ -93,42 +95,29 @@ body {
   animation: pulse-soft 2s ease-in-out infinite;
 }
 
-/* Staggered animations */
-.stagger-1 { animation-delay: 0.05s; }
-.stagger-2 { animation-delay: 0.1s; }
-.stagger-3 { animation-delay: 0.15s; }
-.stagger-4 { animation-delay: 0.2s; }
-.stagger-5 { animation-delay: 0.25s; }
+.stagger-1 { animation-delay: 0.04s; }
+.stagger-2 { animation-delay: 0.08s; }
+.stagger-3 { animation-delay: 0.12s; }
+.stagger-4 { animation-delay: 0.16s; }
+.stagger-5 { animation-delay: 0.2s; }
 
-/* Smooth transitions for interactive elements */
+/* Button hover */
 .btn-hover {
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 .btn-hover:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-0.5px);
+  box-shadow: var(--shadow-sm);
 }
 .btn-hover:active {
   transform: translateY(0);
 }
 
-/* Input focus animation */
+/* Input focus */
 .input-focus {
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
 }
 .input-focus:focus {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
-}
-
-/* Progress bar shimmer */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.progress-shimmer {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--green-light);
 }
