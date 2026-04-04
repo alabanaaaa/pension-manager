@@ -104,36 +104,49 @@ type AccountSummary struct {
 // GetMemberProfile retrieves the full member profile for the portal
 func (s *Service) GetMemberProfile(ctx context.Context, memberID string) (*MemberProfile, error) {
 	query := `
-		SELECT m.member_no, m.first_name, m.last_name, m.other_names, m.gender, m.date_of_birth,
-		       m.nationality, m.id_number, m.kra_pin, m.email, m.phone, m.postal_address,
-		       m.postal_code, m.town, m.marital_status, m.spouse_name, m.payroll_no,
-		       m.designation, m.department, m.date_first_appt, m.date_joined_scheme,
-		       m.expected_retirement, m.membership_status, m.basic_salary, m.account_balance,
-		       m.inpatient_limit, m.outpatient_limit, m.total_withdrawals, m.last_contribution,
-		       m.bank_name, m.bank_branch, m.bank_account,
+		SELECT m.member_no, m.first_name, m.last_name,
+		       COALESCE(m.other_names, ''), COALESCE(m.gender, ''), m.date_of_birth,
+		       COALESCE(m.nationality, ''), COALESCE(m.id_number, ''), COALESCE(m.kra_pin, ''),
+		       COALESCE(m.email, ''), COALESCE(m.phone, ''), COALESCE(m.postal_address, ''),
+		       COALESCE(m.postal_code, ''), COALESCE(m.town, ''),
+		       COALESCE(m.marital_status, ''), COALESCE(m.spouse_name, ''),
+		       COALESCE(m.payroll_no, ''), COALESCE(m.designation, ''), COALESCE(m.department, ''),
+		       COALESCE(m.date_first_appt, '1970-01-01'::timestamptz),
+		       m.date_joined_scheme,
+		       COALESCE(m.expected_retirement, '1970-01-01'::timestamptz),
+		       COALESCE(m.membership_status, ''), m.basic_salary, m.account_balance,
+		       m.inpatient_limit, m.outpatient_limit, m.total_withdrawals,
+		       COALESCE(m.last_contribution, '1970-01-01'::timestamptz),
+		       COALESCE(m.bank_name, ''), COALESCE(m.bank_branch, ''), COALESCE(m.bank_account, ''),
 		       COALESCE(s.name, '') as sponsor_name, COALESCE(s.code, '') as sponsor_code
 		FROM members m
 		LEFT JOIN sponsors s ON s.id = m.sponsor_id
 		WHERE m.id = $1
 	`
 	var profile MemberProfile
-	var otherNames, kraPin, postalAddr, postalCode, town, spouseName, payrollNo, designation, department sql.NullString
-	var dateFirstAppt, expectedRetirement, lastContribution sql.NullTime
-	var sponsorName, sponsorCode, bankName, bankBranch, bankAccount sql.NullString
+	var otherNames sql.NullString
 
 	err := s.db.QueryRowContext(ctx, query, memberID).Scan(
 		&profile.EmploymentInfo.MemberNo,
-		&profile.PersonalInfo.FullName, &profile.PersonalInfo.FullName, // first+last combined later
+		&profile.PersonalInfo.FullName, &profile.PersonalInfo.FullName, // first_name, last_name
 		&otherNames, &profile.PersonalInfo.Gender, &profile.PersonalInfo.DateOfBirth,
-		&profile.PersonalInfo.Nationality, &profile.PersonalInfo.NationalID, &kraPin,
-		&profile.ContactInfo.Email, &profile.ContactInfo.MobileNumber, &postalAddr,
-		&postalCode, &town, &profile.PersonalInfo.MaritalStatus, &spouseName, &payrollNo,
-		&designation, &department, &dateFirstAppt, &profile.EmploymentInfo.DateJoinedScheme,
-		&expectedRetirement, &profile.AccountSummary.MembershipStatus, &profile.EmploymentInfo.BasicSalary,
-		&profile.AccountSummary.AccountBalance, &profile.MedicalLimits.InpatientLimit,
-		&profile.MedicalLimits.OutpatientLimit, &profile.AccountSummary.TotalWithdrawals,
-		&lastContribution, &bankName, &bankBranch, &bankAccount,
-		&sponsorName, &sponsorCode,
+		&profile.PersonalInfo.Nationality, &profile.PersonalInfo.NationalID,
+		&profile.PersonalInfo.KRAPIN,
+		&profile.ContactInfo.Email, &profile.ContactInfo.MobileNumber,
+		&profile.ContactInfo.PostalAddress, &profile.ContactInfo.PostalCode,
+		&profile.ContactInfo.Town,
+		&profile.PersonalInfo.MaritalStatus, &profile.PersonalInfo.SpouseName,
+		&profile.EmploymentInfo.PayrollNo, &profile.EmploymentInfo.Designation,
+		&profile.EmploymentInfo.Department,
+		&profile.EmploymentInfo.DateFirstAppt, &profile.EmploymentInfo.DateJoinedScheme,
+		&profile.AccountSummary.ExpectedRetirement,
+		&profile.AccountSummary.MembershipStatus,
+		&profile.EmploymentInfo.BasicSalary, &profile.AccountSummary.AccountBalance,
+		&profile.MedicalLimits.InpatientLimit, &profile.MedicalLimits.OutpatientLimit,
+		&profile.AccountSummary.TotalWithdrawals, &profile.AccountSummary.LastContribution,
+		&profile.EmploymentInfo.BankName, &profile.EmploymentInfo.BankBranch,
+		&profile.EmploymentInfo.BankAccount,
+		&profile.EmploymentInfo.SponsorName, &profile.EmploymentInfo.SponsorCode,
 	)
 	if err == sql.ErrNoRows {
 		return nil, errors.New("member not found")
@@ -144,78 +157,19 @@ func (s *Service) GetMemberProfile(ctx context.Context, memberID string) (*Membe
 
 	// Build full name
 	fullName := profile.PersonalInfo.FullName
-	if otherNames.Valid {
+	if otherNames.Valid && otherNames.String != "" {
 		fullName += " " + otherNames.String
 	}
 	profile.PersonalInfo.FullName = fullName
 
-	// Set optional fields
-	if kraPin.Valid {
-		profile.PersonalInfo.KRAPIN = kraPin.String
-	}
-	if spouseName.Valid {
-		profile.PersonalInfo.SpouseName = spouseName.String
-	}
-	if postalAddr.Valid {
-		profile.ContactInfo.PostalAddress = postalAddr.String
-	}
-	if postalCode.Valid {
-		profile.ContactInfo.PostalCode = postalCode.String
-	}
-	if town.Valid {
-		profile.ContactInfo.Town = town.String
-	}
-	if payrollNo.Valid {
-		profile.EmploymentInfo.PayrollNo = payrollNo.String
-	}
-	if designation.Valid {
-		profile.EmploymentInfo.Designation = designation.String
-	}
-	if department.Valid {
-		profile.EmploymentInfo.Department = department.String
-	}
-	if dateFirstAppt.Valid {
-		profile.EmploymentInfo.DateFirstAppt = dateFirstAppt.Time
-	}
-	if expectedRetirement.Valid {
-		profile.AccountSummary.ExpectedRetirement = expectedRetirement.Time
-	}
-	if lastContribution.Valid {
-		profile.AccountSummary.LastContribution = lastContribution.Time
-	}
-	if sponsorName.Valid {
-		profile.EmploymentInfo.SponsorName = sponsorName.String
-	}
-	if sponsorCode.Valid {
-		profile.EmploymentInfo.SponsorCode = sponsorCode.String
-	}
-	if bankName.Valid {
-		profile.EmploymentInfo.BankName = bankName.String
-	}
-	if bankBranch.Valid {
-		profile.EmploymentInfo.BankBranch = bankBranch.String
-	}
-	if bankAccount.Valid {
-		profile.EmploymentInfo.BankAccount = bankAccount.String
-	}
-
-	profile.ContactInfo.WorkTelephone = profile.EmploymentInfo.MemberNo // placeholder
-	profile.EmploymentInfo.Address = profile.ContactInfo.PostalAddress
-	profile.EmploymentInfo.Town = profile.ContactInfo.Town
-
 	// Calculate age
-	now := time.Now()
-	profile.PersonalInfo.Age = now.Year() - profile.PersonalInfo.DateOfBirth.Year()
-	if now.YearDay() < profile.PersonalInfo.DateOfBirth.YearDay() {
-		profile.PersonalInfo.Age--
+	if !profile.PersonalInfo.DateOfBirth.IsZero() {
+		now := time.Now()
+		profile.PersonalInfo.Age = now.Year() - profile.PersonalInfo.DateOfBirth.Year()
+		if now.YearDay() < profile.PersonalInfo.DateOfBirth.YearDay() {
+			profile.PersonalInfo.Age--
+		}
 	}
-
-	// Get beneficiaries
-	benefs, err := s.GetMemberBeneficiaries(ctx, memberID)
-	if err != nil {
-		return nil, fmt.Errorf("get beneficiaries: %w", err)
-	}
-	profile.Beneficiaries = benefs
 
 	return &profile, nil
 }
