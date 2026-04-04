@@ -147,27 +147,22 @@ export const bulk = {
   batchStatementsExport: (params) => api.get('/bulk/statements/batch/export', { params }),
 };
 
-// Portal (Member self-service)
-export const portal = {
-  getProfile: () => api.get('/portal/profile'),
-  getBeneficiaries: () => api.get('/portal/beneficiaries'),
-  getContributions: (params) => api.get('/portal/contributions', { params }),
-  getAnnualContributions: () => api.get('/portal/contributions/annual'),
-  getChangeRequests: () => api.get('/portal/change-requests'),
-  requestContactChange: (data) => api.post('/portal/change-requests/contact', data),
-  requestBeneficiaryChange: (data) => api.post('/portal/change-requests/beneficiary', data),
-  submitFeedback: (data) => api.post('/portal/feedback', data),
-  getFeedback: () => api.get('/portal/feedback'),
-  getLoginStats: () => api.get('/portal/login-stats'),
-  getStatement: () => api.get('/portal/statement'),
-  downloadStatementPDF: () => api.get('/portal/statement/pdf', { responseType: 'blob' }),
-  projectBenefits: (data) => api.post('/portal/projection', data),
-  getBenefitQuote: () => api.get('/portal/projection/quote'),
-  uploadPhoto: (formData) => api.post('/portal/photo-upload', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  }),
-  getDocuments: () => api.get('/portal/documents'),
-  downloadDocument: (id) => api.get(`/portal/documents/${id}/download`, { responseType: 'blob' }),
+// Sponsors
+export const sponsor = {
+  list: () => api.get('/sponsors'),
+  get: (id) => api.get(`/sponsors/${id}`),
+  create: (data) => api.post('/sponsors', data),
+  update: (id, data) => api.put(`/sponsors/${id}`, data),
+  getStats: (id) => api.get(`/sponsors/${id}/stats`),
+};
+
+// Pending Changes (Maker-Checker)
+export const pendingChanges = {
+  list: (params) => api.get('/pending-changes', { params }),
+  get: (id) => api.get(`/pending-changes/${id}`),
+  approve: (id, notes) => api.post(`/pending-changes/${id}/approve`, { notes }),
+  reject: (id, reason) => api.post(`/pending-changes/${id}/reject`, { reason }),
+  getCount: () => api.get('/pending-changes/count'),
 };
 
 // Tax
@@ -179,7 +174,6 @@ export const tax = {
   getBrackets: () => api.get('/tax/brackets'),
   getReliefs: () => api.get('/tax/reliefs'),
   getMemberTaxStatus: (memberId) => api.get(`/tax/member/${memberId}`),
-  // Tax reminders
   getExpiring: (days) => api.get('/tax/reminders/expiring', { params: { days } }),
   getOverdue: () => api.get('/tax/reminders/overdue'),
   getPending: () => api.get('/tax/reminders/pending'),
@@ -215,23 +209,6 @@ export const news = {
   getPublic: (params) => api.get('/news/public', { params }),
 };
 
-// Users (Admin)
-export const users = {
-  list: () => api.get('/admin/users'),
-  create: (data) => api.post('/admin/users', data),
-  updateRole: (id, role) => api.put(`/admin/users/${id}/role`, { role }),
-  disable: (id) => api.delete(`/admin/users/${id}`),
-};
-
-// Pending Changes (Maker-Checker)
-export const pendingChanges = {
-  list: (params) => api.get('/pending-changes', { params }),
-  get: (id) => api.get(`/pending-changes/${id}`),
-  approve: (id, notes) => api.post(`/pending-changes/${id}/approve`, { notes }),
-  reject: (id, reason) => api.post(`/pending-changes/${id}/reject`, { reason }),
-  getCount: () => api.get('/pending-changes/count'),
-};
-
 // Dashboard
 export const dashboard = {
   get: () => api.get('/dashboard'),
@@ -243,3 +220,4 @@ export const ghost = {
 };
 
 export default api;
+

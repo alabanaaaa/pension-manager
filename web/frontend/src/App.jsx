@@ -10,11 +10,19 @@ import ClaimsPage from './pages/ClaimsPage';
 import VotingPage from './pages/VotingPage';
 import HospitalsPage from './pages/HospitalsPage';
 import ReportsPage from './pages/ReportsPage';
+import SponsorsPage from './pages/SponsorsPage';
+import BulkProcessingPage from './pages/BulkProcessingPage';
+import MakerCheckerPage from './pages/MakerCheckerPage';
+import TaxPage from './pages/TaxPage';
+import SMSPage from './pages/SMSPage';
+import NewsPage from './pages/NewsPage';
+import SecurityPage from './pages/SecurityPage';
+import SettingsPage from './pages/SettingsPage';
 import PlaceholderPage from './pages/PlaceholderPage';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-neutral-900 border-t-transparent rounded-full" /></div>;
   if (!user) return <Navigate to="/login" />;
   return children;
 }
@@ -42,16 +50,16 @@ function AppRoutes() {
         <Route path="hospitals" element={<HospitalsPage />} />
         <Route path="hospitals/new" element={<PlaceholderPage title="Add Hospital" description="Add a new hospital" />} />
         <Route path="hospitals/:id" element={<PlaceholderPage title="Hospital Details" description="View hospital information" />} />
-        <Route path="sponsors" element={<PlaceholderPage title="Sponsors" description="Manage sponsors" />} />
+        <Route path="sponsors" element={<SponsorsPage />} />
         <Route path="reports" element={<ReportsPage />} />
-        <Route path="bulk" element={<PlaceholderPage title="Bulk Processing" description="Import members, batch statements, annual posting" />} />
-        <Route path="bulk/import" element={<PlaceholderPage title="Import Members" description="Bulk import members from CSV" />} />
-        <Route path="maker-checker" element={<PlaceholderPage title="Maker-Checker" description="Review pending changes" />} />
-        <Route path="tax" element={<PlaceholderPage title="Tax Management" description="Tax computation and exemptions" />} />
-        <Route path="sms" element={<PlaceholderPage title="SMS Gateway" description="Send bulk messages" />} />
-        <Route path="news" element={<PlaceholderPage title="News" description="Kenya government news" />} />
-        <Route path="security" element={<PlaceholderPage title="Security" description="IP blacklisting and access control" />} />
-        <Route path="settings" element={<PlaceholderPage title="Settings" description="System settings" />} />
+        <Route path="bulk" element={<BulkProcessingPage />} />
+        <Route path="bulk/import" element={<BulkProcessingPage />} />
+        <Route path="maker-checker" element={<MakerCheckerPage />} />
+        <Route path="tax" element={<TaxPage />} />
+        <Route path="sms" element={<SMSPage />} />
+        <Route path="news" element={<NewsPage />} />
+        <Route path="security" element={<SecurityPage />} />
+        <Route path="settings" element={<SettingsPage />} />
         {/* Member Portal */}
         <Route path="portal" element={<PlaceholderPage title="My Dashboard" description="Member portal dashboard" />} />
         <Route path="portal/profile" element={<PlaceholderPage title="My Profile" description="View and update profile" />} />
