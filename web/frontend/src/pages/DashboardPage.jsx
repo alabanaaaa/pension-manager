@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboard, pendingChanges } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import {
   Users, CreditCard, FileText, Vote, TrendingUp,
   AlertTriangle, CheckCircle, Clock, ArrowUpRight,
@@ -9,9 +10,18 @@ import {
 } from 'lucide-react';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [pendingCount, setPendingCount] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    const name = user?.name?.split(' ')[0] || 'User';
+    if (hour < 12) return { text: `Good morning, ${name}`, emoji: '☀️' };
+    if (hour < 17) return { text: `Good afternoon, ${name}`, emoji: '🌤️' };
+    return { text: `Good evening, ${name}`, emoji: '🌙' };
+  };
 
   useEffect(() => {
     Promise.all([
@@ -23,6 +33,8 @@ export default function DashboardPage() {
       setLoading(false);
     });
   }, []);
+
+  const greeting = getGreeting();
 
   const statCards = [
     { label: 'Total Members', value: stats?.total_members ?? '—', icon: Users, color: 'blue', change: stats?.member_growth, href: '/members' },
@@ -62,6 +74,7 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-end justify-between animate-fade-in-up">
         <div>
+          <p className="text-sm text-neutral-400 mb-1">{greeting.emoji} {greeting.text}</p>
           <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Dashboard</h1>
           <p className="text-neutral-500 mt-2 text-base">Overview of your pension management system</p>
         </div>
