@@ -14,7 +14,7 @@ func (s *Server) registerTaxRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))
 
-		r.Route("/tax", func(r chi.Router) {
+		r.Route("/api/tax", func(r chi.Router) {
 			r.Post("/compute", s.handleComputeTax)
 			r.Post("/compute/monthly", s.handleComputeMonthlyTax)
 			r.Post("/compute/withdrawal", s.handleComputeWithdrawalTax)

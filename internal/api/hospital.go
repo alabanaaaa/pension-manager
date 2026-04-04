@@ -19,7 +19,7 @@ func (s *Server) registerHospitalRoutes(r chi.Router) {
 		r.Use(RoleMiddleware("admin", "officer", "hospital_admin"))
 
 		// Hospital management
-		r.Route("/hospitals", func(r chi.Router) {
+		r.Route("/api/hospitals", func(r chi.Router) {
 			r.Post("/", s.handleCreateHospital)
 			r.Get("/", s.handleListHospitals)
 			r.Route("/{hospitalID}", func(r chi.Router) {
@@ -29,13 +29,13 @@ func (s *Server) registerHospitalRoutes(r chi.Router) {
 		})
 
 		// Medical limits
-		r.Route("/members/{memberID}/medical-limits", func(r chi.Router) {
+		r.Route("/api/members/{memberID}/medical-limits", func(r chi.Router) {
 			r.Post("/", s.handleCreateMedicalLimit)
 			r.Get("/", s.handleGetMedicalLimit)
 		})
 
 		// Medical expenditures
-		r.Route("/medical-expenditures", func(r chi.Router) {
+		r.Route("/api/medical-expenditures", func(r chi.Router) {
 			r.Post("/", s.handleRecordMedicalExpenditure)
 			r.Get("/", s.handleListMedicalExpenditures)
 			r.Get("/pending", s.handleGetPendingBills)

@@ -14,7 +14,7 @@ func (s *Server) registerSMSRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("super_admin", "admin", "pension_officer"))
 
-		r.Route("/sms", func(r chi.Router) {
+		r.Route("/api/sms", func(r chi.Router) {
 			r.Post("/send", s.handleSendSMS)
 			r.Post("/send/bulk", s.handleSendBulkSMS)
 			r.Post("/send/otp", s.handleSendOTPSMS)

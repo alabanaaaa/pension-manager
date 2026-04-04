@@ -32,7 +32,7 @@ func (s *Server) registerClaimsRoutes(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))
 
 		// Claims CRUD
-		r.Route("/claims", func(r chi.Router) {
+		r.Route("/api/claims", func(r chi.Router) {
 			r.Post("/", s.handleCreateClaim)
 			r.Get("/", s.handleListClaims)
 			r.Get("/{id}", s.handleGetClaim)
@@ -44,7 +44,7 @@ func (s *Server) registerClaimsRoutes(r chi.Router) {
 		})
 
 		// Death benefits
-		r.Route("/death-benefits", func(r chi.Router) {
+		r.Route("/api/death-benefits", func(r chi.Router) {
 			r.Get("/{claimId}", s.handleGetDeathBenefits)
 			r.Put("/{claimId}/distribute", s.handleDistributeDeathBenefits)
 		})

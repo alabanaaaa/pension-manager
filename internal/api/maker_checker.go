@@ -36,7 +36,7 @@ func (s *Server) registerMakerCheckerRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("admin", "pension_officer", "super_admin"))
 
-		r.Route("/pending-changes", func(r chi.Router) {
+		r.Route("/api/pending-changes", func(r chi.Router) {
 			r.Get("/", s.handleListPendingChanges)
 			r.Get("/{id}", s.handleGetPendingChange)
 			r.Post("/{id}/approve", s.handleApproveChange)

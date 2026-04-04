@@ -22,7 +22,7 @@ func (s *Server) registerPortalRoutes(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))
 		r.Use(MemberPortalMiddleware(s.db))
 
-		r.Route("/portal", func(r chi.Router) {
+		r.Route("/api/portal", func(r chi.Router) {
 			r.Get("/profile", s.handleGetProfile)
 			r.Get("/beneficiaries", s.handleGetBeneficiaries)
 			r.Get("/contributions", s.handleGetContributions)

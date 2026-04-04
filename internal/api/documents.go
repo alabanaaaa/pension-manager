@@ -16,7 +16,7 @@ func (s *Server) registerDocumentRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))
 
-		r.Route("/documents", func(r chi.Router) {
+		r.Route("/api/documents", func(r chi.Router) {
 			r.Post("/upload", s.handleUploadDocument)
 			r.Get("/{id}", s.handleGetDocument)
 			r.Get("/{id}/download", s.handleDownloadDocument)

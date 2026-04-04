@@ -20,7 +20,7 @@ func (s *Server) registerVotingRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("super_admin", "admin", "pension_officer"))
 
-		r.Route("/voting/admin", func(r chi.Router) {
+		r.Route("/api/voting/admin", func(r chi.Router) {
 			// Elections
 			r.Post("/elections", s.handleCreateElection)
 			r.Get("/elections", s.handleListElections)
@@ -51,7 +51,7 @@ func (s *Server) registerVotingRoutes(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))
 		r.Use(MemberPortalMiddleware(s.db))
 
-		r.Route("/voting", func(r chi.Router) {
+		r.Route("/api/voting", func(r chi.Router) {
 			r.Get("/elections", s.handleMemberListElections)
 			r.Get("/elections/{id}", s.handleMemberGetElection)
 			r.Get("/elections/{id}/candidates", s.handleMemberListCandidates)

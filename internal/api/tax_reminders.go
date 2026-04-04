@@ -12,7 +12,7 @@ func (s *Server) registerTaxReminderRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("super_admin", "admin", "pension_officer"))
 
-		r.Route("/tax/reminders", func(r chi.Router) {
+		r.Route("/api/tax/reminders", func(r chi.Router) {
 			r.Get("/expiring", s.handleGetExpiringExemptions)
 			r.Get("/overdue", s.handleGetOverdueExemptions)
 			r.Get("/pending", s.handleGetPendingReminders)

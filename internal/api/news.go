@@ -11,7 +11,7 @@ func (s *Server) registerNewsRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware(s.auth))
 
-		r.Route("/news", func(r chi.Router) {
+		r.Route("/api/news", func(r chi.Router) {
 			r.Get("/", s.handleGetNews)
 			r.Get("/categories", s.handleGetNewsCategories)
 			r.Get("/refresh", s.handleRefreshNews)

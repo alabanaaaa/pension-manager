@@ -12,7 +12,7 @@ func (s *Server) registerIPBlacklistRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("super_admin", "admin"))
 
-		r.Route("/security/ip-blacklist", func(r chi.Router) {
+		r.Route("/api/security/ip-blacklist", func(r chi.Router) {
 			r.Post("/", s.handleBlacklistIP)
 			r.Delete("/{ip}", s.handleRemoveIP)
 			r.Get("/", s.handleListBlacklistedIPs)

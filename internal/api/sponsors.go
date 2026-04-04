@@ -16,7 +16,7 @@ func (s *Server) registerSponsorRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("admin", "pension_officer", "super_admin"))
 
-		r.Route("/sponsors", func(r chi.Router) {
+		r.Route("/api/sponsors", func(r chi.Router) {
 			r.Post("/", s.handleCreateSponsor)
 			r.Get("/", s.handleListSponsors)
 			r.Get("/{id}", s.handleGetSponsor)

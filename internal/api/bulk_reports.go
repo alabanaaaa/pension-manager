@@ -15,7 +15,7 @@ func (s *Server) registerBulkRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("super_admin", "admin", "pension_officer"))
 
-		r.Route("/bulk", func(r chi.Router) {
+		r.Route("/api/bulk", func(r chi.Router) {
 			r.Post("/import/members", s.handleImportMembers)
 			r.Post("/validate", s.handleValidateBulkUpdate)
 			r.Post("/process/retirements", s.handleProcessRetirements)
@@ -32,7 +32,7 @@ func (s *Server) registerReportRoutes(r chi.Router) {
 	r.Group(func(r chi.Router) {
 		r.Use(RoleMiddleware("super_admin", "admin", "pension_officer", "auditor"))
 
-		r.Route("/reports/contributions", func(r chi.Router) {
+		r.Route("/api/reports/contributions", func(r chi.Router) {
 			r.Get("/breakdown", s.handleContributionBreakdown)
 			r.Get("/ytd", s.handleYTDContributions)
 			r.Get("/cumulative", s.handleCumulativeContributions)

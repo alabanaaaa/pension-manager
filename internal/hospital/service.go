@@ -71,15 +71,28 @@ func (s *HospitalService) GetHospital(ctx context.Context, hospitalID string) (*
 		FROM hospitals WHERE id = $1
 	`
 	h := &domain.Hospital{}
+	var address, phone, email, licenseNumber sql.NullString
 	err := s.db.QueryRowContext(ctx, query, hospitalID).Scan(
-		&h.ID, &h.SchemeID, &h.Name, &h.Address, &h.Phone, &h.Email,
-		&h.LicenseNumber, &h.AccountBalance, &h.Status, &h.CreatedAt, &h.UpdatedAt,
+		&h.ID, &h.SchemeID, &h.Name, &address, &phone, &email,
+		&licenseNumber, &h.AccountBalance, &h.Status, &h.CreatedAt, &h.UpdatedAt,
 	)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("get hospital: %w", err)
+	}
+	if address.Valid {
+		h.Address = address.String
+	}
+	if phone.Valid {
+		h.Phone = phone.String
+	}
+	if email.Valid {
+		h.Email = email.String
+	}
+	if licenseNumber.Valid {
+		h.LicenseNumber = licenseNumber.String
 	}
 	return h, nil
 }
@@ -139,11 +152,24 @@ func (s *HospitalService) ListHospitals(ctx context.Context, schemeID string) ([
 	var hospitals []*domain.Hospital
 	for rows.Next() {
 		h := &domain.Hospital{}
+		var address, phone, email, licenseNumber sql.NullString
 		if err := rows.Scan(
-			&h.ID, &h.SchemeID, &h.Name, &h.Address, &h.Phone, &h.Email,
-			&h.LicenseNumber, &h.AccountBalance, &h.Status, &h.CreatedAt, &h.UpdatedAt,
+			&h.ID, &h.SchemeID, &h.Name, &address, &phone, &email,
+			&licenseNumber, &h.AccountBalance, &h.Status, &h.CreatedAt, &h.UpdatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("scan hospital: %w", err)
+		}
+		if address.Valid {
+			h.Address = address.String
+		}
+		if phone.Valid {
+			h.Phone = phone.String
+		}
+		if email.Valid {
+			h.Email = email.String
+		}
+		if licenseNumber.Valid {
+			h.LicenseNumber = licenseNumber.String
 		}
 		hospitals = append(hospitals, h)
 	}
