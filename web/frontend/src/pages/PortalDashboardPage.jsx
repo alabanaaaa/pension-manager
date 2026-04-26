@@ -3,8 +3,8 @@ import { useAuth } from '../context/AuthContext';
 import { portal, contributions, claims, voting } from '../lib/api';
 import {
   User, CreditCard, FileText, Vote, TrendingUp,
-  MessageSquare, Settings, Calendar, Clock, ArrowUpRight,
-  ArrowDownRight, Activity, Bell, ChevronRight, Loader2
+  MessageSquare, Settings, Calendar, Clock, ArrowRight,
+  Activity, Bell, ChevronRight, Loader2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -20,9 +20,9 @@ export default function PortalDashboardPage() {
   const getGreeting = () => {
     const hour = new Date().getHours();
     const name = user?.name?.split(' ')[0] || 'Member';
-    if (hour < 12) return { text: `Good morning, ${name}`, emoji: '☀️' };
-    if (hour < 17) return { text: `Good afternoon, ${name}`, emoji: '🌤️' };
-    return { text: `Good evening, ${name}`, emoji: '🌙' };
+    if (hour < 12) return `Good morning, ${name}`;
+    if (hour < 17) return `Good afternoon, ${name}`;
+    return `Good evening, ${name}`;
   };
 
   useEffect(() => {
@@ -47,141 +47,117 @@ export default function PortalDashboardPage() {
   const greeting = getGreeting();
 
   const quickLinks = [
-    { icon: User, label: 'My Profile', desc: 'View and update personal info', href: '/portal/profile', color: 'blue' },
-    { icon: CreditCard, label: 'Contributions', desc: 'View contribution history', href: '/portal/contributions', color: 'emerald' },
-    { icon: FileText, label: 'My Claims', desc: 'Check claim status', href: '/portal/claims', color: 'amber' },
-    { icon: Vote, label: 'Vote', desc: 'Cast your vote', href: '/portal/voting', color: 'violet' },
-    { icon: TrendingUp, label: 'Projections', desc: 'Benefit projections', href: '/portal/projections', color: 'sky' },
-    { icon: MessageSquare, label: 'Feedback', desc: 'Submit feedback', href: '/portal/feedback', color: 'rose' },
+    { icon: User, label: 'My Profile', desc: 'View and update personal info', href: '/portal/profile' },
+    { icon: CreditCard, label: 'Contributions', desc: 'View contribution history', href: '/portal/contributions' },
+    { icon: FileText, label: 'My Claims', desc: 'Check claim status', href: '/portal/claims' },
+    { icon: Vote, label: 'Vote', desc: 'Cast your vote', href: '/portal/voting' },
+    { icon: TrendingUp, label: 'Projections', desc: 'Benefit projections', href: '/portal/projections' },
+    { icon: MessageSquare, label: 'Feedback', desc: 'Submit feedback', href: '/portal/feedback' },
   ];
-
-  const colorMap = {
-    blue: { bg: 'bg-blue-50', icon: 'text-blue-600' },
-    emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600' },
-    amber: { bg: 'bg-amber-50', icon: 'text-amber-600' },
-    violet: { bg: 'bg-violet-50', icon: 'text-violet-600' },
-    sky: { bg: 'bg-sky-50', icon: 'text-sky-600' },
-    rose: { bg: 'bg-rose-50', icon: 'text-rose-600' },
-  };
 
   if (loading) {
     return (
       <div className="p-16 text-center">
-        <Loader2 size={24} className="animate-spin mx-auto text-neutral-300" />
-        <p className="text-sm text-neutral-400 mt-3">Loading your dashboard...</p>
+        <Loader2 size={24} className="animate-spin mx-auto text-gray-300" />
+        <p className="text-sm text-gray-400 mt-3">Loading your dashboard...</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8 animate-fade-in-up">
-      {/* Greeting */}
+      {/* Header */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="text-sm text-neutral-400 mb-1">{greeting.emoji} {greeting.text}</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">My Dashboard</h1>
-          <p className="text-neutral-500 mt-2 text-base">Welcome to your member portal</p>
+          <p className="text-sm text-gray-500 mb-1">{greeting}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-black">My Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Welcome to your member portal</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-neutral-400">
+        <div className="flex items-center gap-2 text-sm text-gray-400">
           <Calendar size={14} />
           <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-2xl border border-neutral-50 p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-2.5 rounded-xl bg-blue-50"><User size={20} className="text-blue-600" /></div>
+      {/* Stats - Uber Style */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: User, label: 'Member No', value: profile?.member_no || '—' },
+          { icon: CreditCard, label: 'Contributions', value: contribCount },
+          { icon: FileText, label: 'Pending Claims', value: claimCount },
+          { icon: Vote, label: 'Open Elections', value: elections.length },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <stat.icon size={14} className="text-gray-400" />
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
+            </div>
+            <p className="text-xl font-bold text-black">{stat.value}</p>
           </div>
-          <p className="text-sm text-neutral-500">Member No</p>
-          <p className="text-xl font-semibold tracking-tight text-neutral-900 mt-1">{profile?.member_no || '—'}</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-neutral-50 p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-2.5 rounded-xl bg-emerald-50"><CreditCard size={20} className="text-emerald-600" /></div>
-          </div>
-          <p className="text-sm text-neutral-500">Contributions</p>
-          <p className="text-xl font-semibold tracking-tight text-neutral-900 mt-1">{contribCount}</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-neutral-50 p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-2.5 rounded-xl bg-amber-50"><FileText size={20} className="text-amber-600" /></div>
-          </div>
-          <p className="text-sm text-neutral-500">Pending Claims</p>
-          <p className="text-xl font-semibold tracking-tight text-neutral-900 mt-1">{claimCount}</p>
-        </div>
-        <div className="bg-white rounded-2xl border border-neutral-50 p-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="p-2.5 rounded-xl bg-violet-50"><Vote size={20} className="text-violet-600" /></div>
-          </div>
-          <p className="text-sm text-neutral-500">Open Elections</p>
-          <p className="text-xl font-semibold tracking-tight text-neutral-900 mt-1">{elections.length}</p>
-        </div>
+        ))}
       </div>
 
       {/* Quick Links */}
-      <div className="bg-white rounded-2xl border border-neutral-50 overflow-hidden">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-          <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Quick Actions</h2>
-          <ChevronRight size={16} className="text-neutral-300" />
+      <div className="bg-white border border-gray-200 rounded-lg">
+        <div className="px-5 py-4 border-b border-gray-100">
+          <h2 className="text-base font-semibold text-black">Quick Actions</h2>
         </div>
-        <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {quickLinks.map((link, i) => (
             <Link
               key={link.label}
               to={link.href}
-              className="btn-hover group flex items-start gap-4 p-5 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-all animate-fade-in"
-              style={{ animationDelay: `${i * 0.05}s` }}
+              className="group flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-black hover:bg-gray-50 transition-all"
             >
-              <div className={`p-2.5 rounded-xl ${colorMap[link.color].bg} flex-shrink-0`}>
-                <link.icon size={18} className={colorMap[link.color].icon} />
+              <div className="p-2 border border-gray-200 rounded">
+                <link.icon size={18} className="text-black" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-neutral-900">{link.label}</p>
-                <p className="text-xs text-neutral-400 mt-0.5">{link.desc}</p>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-black">{link.label}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{link.desc}</p>
               </div>
+              <ArrowRight size={14} className="text-gray-300 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
             </Link>
           ))}
         </div>
       </div>
 
-      {/* Account Summary & Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Account Summary */}
-        <div className="bg-white rounded-2xl border border-neutral-50 overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Account Summary</h2>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-base font-semibold text-black">Account Summary</h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-5">
             {[
               { label: 'Account Balance', value: profile?.account_summary?.account_balance ? `KES ${(profile.account_summary.account_balance / 100).toLocaleString()}` : '—' },
               { label: 'Basic Salary', value: profile?.employment_info?.basic_salary ? `KES ${(profile.employment_info.basic_salary / 100).toLocaleString()}` : '—' },
               { label: 'Department', value: profile?.employment_info?.department || '—' },
               { label: 'Membership Status', value: profile?.account_summary?.membership_status || '—' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b border-neutral-50 last:border-0">
-                <span className="text-sm text-neutral-600">{item.label}</span>
-                <span className="text-sm font-medium text-neutral-900">{item.value}</span>
+              <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-500">{item.label}</span>
+                <span className="text-sm font-medium text-black">{item.value}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Login Activity */}
-        <div className="bg-white rounded-2xl border border-neutral-50 overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Login Activity</h2>
+        <div className="bg-white border border-gray-200 rounded-lg">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <h2 className="text-base font-semibold text-black">Login Activity</h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-5">
             {[
               { label: 'Total Logins', value: loginStats?.total_logins ?? '—' },
               { label: 'Last 30 Days', value: loginStats?.logins_last_30_days ?? '—' },
               { label: 'Last Login', value: loginStats?.last_login ? new Date(loginStats.last_login).toLocaleString() : '—' },
             ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-3 border-b border-neutral-50 last:border-0">
-                <span className="text-sm text-neutral-600">{item.label}</span>
-                <span className="text-sm font-medium text-neutral-900">{item.value}</span>
+              <div key={i} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                <span className="text-sm text-gray-500">{item.label}</span>
+                <span className="text-sm font-medium text-black">{item.value}</span>
               </div>
             ))}
           </div>
@@ -190,21 +166,19 @@ export default function PortalDashboardPage() {
 
       {/* Open Elections */}
       {elections.length > 0 && (
-        <div className="bg-white rounded-2xl border border-neutral-50 overflow-hidden">
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-violet-50"><Vote size={20} className="text-violet-600" /></div>
-              <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Open Elections</h2>
-            </div>
+        <div className="bg-black text-white rounded-lg p-5">
+          <div className="flex items-center gap-3 mb-4">
+            <Vote size={18} />
+            <h2 className="text-base font-semibold">Open Elections</h2>
           </div>
-          <div className="p-6 space-y-4">
-            {elections.map((e, i) => (
-              <div key={e.id} className="flex items-center justify-between py-3 border-b border-neutral-50 last:border-0">
+          <div className="space-y-4">
+            {elections.map((e) => (
+              <div key={e.id} className="flex items-center justify-between py-3 border-b border-white/10 last:border-0">
                 <div>
-                  <p className="text-sm font-medium text-neutral-900">{e.title}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5">{e.description || 'No description'}</p>
+                  <p className="font-medium">{e.title}</p>
+                  <p className="text-sm text-gray-400 mt-0.5">{e.description || 'No description'}</p>
                 </div>
-                <Link to="/portal/voting" className="btn-hover px-4 py-2 bg-violet-600 text-white rounded-xl text-xs font-medium hover:bg-violet-700 transition-all">
+                <Link to="/portal/voting" className="px-4 py-2 bg-white text-black text-sm font-semibold rounded hover:bg-gray-100 transition-colors">
                   Vote Now
                 </Link>
               </div>

@@ -48,6 +48,7 @@ api.interceptors.response.use(
 // Auth
 export const auth = {
   login: (email, password) => api.post('/auth/login', { email, password }),
+  memberLogin: (memberNo, pin) => api.post('/auth/member-login', { member_no: memberNo, pin }),
   refreshToken: (refreshToken) => api.post('/auth/refresh', { refresh_token: refreshToken }),
   requestOTP: (email) => api.get('/auth/otp', { params: { email } }),
   unlockUser: (userId) => api.post(`/auth/unlock/${userId}`),
@@ -165,6 +166,22 @@ export const pendingChanges = {
   getCount: () => api.get('/pending-changes/count'),
 };
 
+// Pending Member Registrations (Maker-Checker)
+export const pendingMembers = {
+  list: (params) => api.get('/members/pending', { params }),
+  get: (id) => api.get(`/members/pending/${id}`),
+  approve: (id) => api.post(`/members/pending/${id}/approve`, {}),
+  reject: (id, reason) => api.post(`/members/pending/${id}/reject`, { reason }),
+};
+
+// Pending Claims (Maker-Checker)
+export const pendingClaims = {
+  list: (params) => api.get('/claims/pending', { params }),
+  get: (id) => api.get(`/claims/pending/${id}`),
+  approve: (id) => api.post(`/claims/pending/${id}/approve`, {}),
+  reject: (id, reason) => api.post(`/claims/pending/${id}/reject`, { reason }),
+};
+
 // Tax
 export const tax = {
   compute: (data) => api.post('/tax/compute', data),
@@ -178,6 +195,64 @@ export const tax = {
   getOverdue: () => api.get('/tax/reminders/overdue'),
   getPending: () => api.get('/tax/reminders/pending'),
   sendReminders: () => api.post('/tax/reminders/send'),
+};
+
+// Tax Exemptions
+export const taxExemptions = {
+  list: (params) => api.get('/tax-exemptions', { params }),
+  get: (id) => api.get(`/tax-exemptions/${id}`),
+  create: (data) => api.post('/tax-exemptions', data),
+  update: (id, data) => api.put(`/tax-exemptions/${id}`, data),
+  delete: (id) => api.delete(`/tax-exemptions/${id}`),
+  approve: (id) => api.post(`/tax-exemptions/${id}/approve`),
+  reject: (id, reason) => api.post(`/tax-exemptions/${id}/reject`, { reason }),
+  getByMember: (memberId) => api.get(`/members/${memberId}/tax-exemptions`),
+};
+
+// Annual Statements
+export const annualStatements = {
+  generate: (data) => api.post('/annual-statements/generate', data),
+  list: (params) => api.get('/annual-statements', { params }),
+  get: (id) => api.get(`/annual-statements/${id}`),
+  downloadPDF: (id) => api.get(`/annual-statements/${id}/pdf`, { responseType: 'blob' }),
+  email: (id) => api.post(`/annual-statements/${id}/email`),
+  bulkEmail: (data) => api.post('/annual-statements/bulk-email', data),
+  hold: (id, reason) => api.put(`/annual-statements/${id}/hold`, { reason }),
+  release: (id) => api.put(`/annual-statements/${id}/release`),
+  delete: (id) => api.delete(`/annual-statements/${id}`),
+  getByMember: (memberId) => api.get(`/members/${memberId}/statements`),
+};
+
+// Beneficiary Drawdowns
+export const drawdowns = {
+  list: (params) => api.get('/drawdowns', { params }),
+  get: (id) => api.get(`/drawdowns/${id}`),
+  create: (deathId, data) => api.post(`/death-benefits/${deathId}/drawdowns`, data),
+  listByDeath: (deathId, params) => api.get(`/death-benefits/${deathId}/drawdowns`, { params }),
+  update: (id, data) => api.put(`/drawdowns/${id}`, data),
+  approve: (id) => api.post(`/drawdowns/${id}/approve`),
+  reject: (id, reason) => api.post(`/drawdowns/${id}/reject`, { reason }),
+  process: (id, paymentRef) => api.post(`/drawdowns/${id}/process`, { payment_reference: paymentRef }),
+};
+
+// Signatures
+export const signatures = {
+  sign: (data) => api.post('/signatures/sign', data),
+  verify: (entityType, entityId, signerId, signature) => api.get(`/signatures/verify/${entityType}/${entityId}`, { params: { signer_id: signerId, signature } }),
+  getByEntity: (entityType, entityId) => api.get(`/signatures/${entityType}/${entityId}`),
+  generateMerkle: (startTime, endTime) => api.post('/signatures/merkle/generate', { start_time: startTime, end_time: endTime }),
+  getPublicKey: () => api.get('/signatures/public-key'),
+  createMultiSigConfig: (data) => api.post('/signatures/multisig/config', data),
+  getMultiSigConfig: (entityType) => api.get(`/signatures/multisig/config/${entityType}`),
+};
+
+// Medical Expenditures
+export const medicalExpenditures = {
+  list: (params) => api.get('/medical-expenditures', { params }),
+  get: (id) => api.get(`/medical-expenditures/${id}`),
+  create: (data) => api.post('/medical-expenditures', data),
+  getPendingBills: (params) => api.get('/medical-expenditures/pending', { params }),
+  getAlerts: (params) => api.get('/medical-expenditures/alerts', { params }),
 };
 
 // SMS
@@ -203,10 +278,21 @@ export const security = {
 
 // News
 export const news = {
-  get: (params) => api.get('/news', { params }),
+  get: (params) => {
+    // Add cache-busting timestamp
+    const cacheBust = { _t: Date.now() };
+    return api.get('/news', { params: { ...params, ...cacheBust } });
+  },
   getCategories: () => api.get('/news/categories'),
-  refresh: () => api.get('/news/refresh'),
-  getPublic: (params) => api.get('/news/public', { params }),
+  refresh: () => {
+    // Add cache-busting
+    return api.get('/news/refresh', { params: { _t: Date.now() } });
+  },
+  getPublic: (params) => {
+    // Add cache-busting timestamp
+    const cacheBust = { _t: Date.now() };
+    return api.get('/news/public', { params: { ...params, ...cacheBust } });
+  },
 };
 
 // Dashboard
@@ -217,6 +303,33 @@ export const dashboard = {
 // Ghost Mode (Fraud Detection)
 export const ghost = {
   get: () => api.get('/ghost'),
+};
+
+// Portal
+export const portal = {
+  getProfile: () => api.get('/portal/profile'),
+  getBeneficiaries: () => api.get('/portal/beneficiaries'),
+  getContributions: (params) => api.get('/portal/contributions', { params }),
+  getAnnualContributions: () => api.get('/portal/contributions/annual'),
+  getChangeRequests: () => api.get('/portal/change-requests'),
+  requestContactChange: (data) => api.post('/portal/change-requests/contact', data),
+  requestBeneficiaryChange: (data) => api.post('/portal/change-requests/beneficiary', data),
+  submitFeedback: (data) => api.post('/portal/feedback', data),
+  getFeedback: () => api.get('/portal/feedback'),
+  getLoginStats: () => api.get('/portal/login-stats'),
+  getStatement: () => api.get('/portal/statement'),
+  downloadStatementPDF: () => api.get('/portal/statement/pdf'),
+  projectBenefits: (data) => api.post('/portal/projection', data),
+  getBenefitQuote: () => api.get('/portal/projection/quote'),
+  uploadPassportPhoto: (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => formData.append(key, data[key]));
+    return api.post('/portal/photo-upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getSchemeDocuments: () => api.get('/portal/documents'),
+  downloadSchemeDocument: (id) => api.get(`/portal/documents/${id}/download`),
 };
 
 export default api;

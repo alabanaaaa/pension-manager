@@ -130,6 +130,66 @@ func (s *Server) login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (s *Server) memberLogin(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		MemberNo string `json:"member_no"`
+		Pin      string `json:"pin"`
+	}
+	if err := decodeJSON(r, &req); err != nil {
+		respondError(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+	if req.MemberNo == "" || req.Pin == "" {
+		respondError(w, http.StatusBadRequest, "member_no and pin are required")
+		return
+	}
+
+	var memberID, schemeID, firstName, lastName, pinHash string
+	var portalEnabled bool
+	err := s.db.QueryRowContext(r.Context(), `
+		SELECT id, scheme_id, first_name, last_name, pin, COALESCE(portal_enabled, true)
+		FROM members WHERE member_no = $1 AND membership_status = 'active'
+	`, req.MemberNo).Scan(&memberID, &schemeID, &firstName, &lastName, &pinHash, &portalEnabled)
+
+	if err == sql.ErrNoRows {
+		respondError(w, http.StatusUnauthorized, "invalid member number or inactive account")
+		return
+	}
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "query failed")
+		return
+	}
+	if !portalEnabled {
+		respondError(w, http.StatusForbidden, "member portal access has been disabled")
+		return
+	}
+	if pinHash == "" {
+		respondError(w, http.StatusUnauthorized, "PIN not set. Please contact administrator.")
+		return
+	}
+	if err := auth.CheckPassword(pinHash, req.Pin); err != nil {
+		respondError(w, http.StatusUnauthorized, "invalid credentials")
+		return
+	}
+
+	name := strings.TrimSpace(firstName + " " + lastName)
+	accessToken, refreshToken, err := s.auth.GenerateToken(memberID, schemeID, "", "member")
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to generate token")
+		return
+	}
+
+	slog.Info("member logged in", "member_id", memberID, "member_no", req.MemberNo)
+	respondJSON(w, http.StatusOK, map[string]interface{}{
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+		"member_id":     memberID,
+		"name":          name,
+		"role":          "member",
+		"scheme_id":     schemeID,
+	})
+}
+
 func (s *Server) requestOTP(w http.ResponseWriter, r *http.Request) {
 	email := r.URL.Query().Get("email")
 	if email == "" {

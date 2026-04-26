@@ -27,7 +27,7 @@ export default function PortalProjectionsPage() {
   return (
     <div className="space-y-8 animate-fade-in-up">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Benefit Projections</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-black">Benefit Projections</h1>
         <p className="text-neutral-500 mt-2 text-base">Project your retirement benefits based on current savings</p>
       </div>
 

@@ -159,10 +159,10 @@ func (s *Server) handleListClaims(w http.ResponseWriter, r *http.Request) {
 	}
 
 	query := `
-		SELECT c.id, c.member_id, c.claim_type, c.claim_form_no, c.date_of_claim,
+		SELECT c.id, c.member_id, c.claim_type, COALESCE(c.claim_form_no,''), c.date_of_claim,
 		       c.date_of_leaving, c.leaving_reason, c.status, c.examiner_id,
-		       c.rejection_reason, c.settlement_date, c.cheque_ref, c.cheque_date,
-		       c.amount, c.created_at, c.updated_at, c.reviewed_at, c.paid_at,
+		       COALESCE(c.rejection_reason,''), c.settlement_date, COALESCE(c.cheque_ref,''), c.cheque_date,
+		       COALESCE(c.amount,0), c.created_at, c.updated_at, c.reviewed_at, c.paid_at,
 		       m.member_no, m.first_name, m.last_name
 		FROM claims c
 		JOIN members m ON m.id = c.member_id

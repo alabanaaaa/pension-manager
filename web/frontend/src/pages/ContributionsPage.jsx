@@ -1,101 +1,203 @@
 import { useState, useEffect } from 'react';
 import { contributions } from '../lib/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
-import { CreditCard, TrendingUp, Loader2, Plus, Download } from 'lucide-react';
+import { 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  AreaChart, Area, PieChart, Pie, Cell
+} from 'recharts';
+import { CreditCard, TrendingUp, Loader2, Plus, Download, DollarSign, Users, Calendar, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+const COLORS = ['#000000', '#333333', '#666666', '#999999', '#CCCCCC'];
 
 export default function ContributionsPage() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     setLoading(true);
-    contributions.list()
+    contributions.list({ limit: 500 })
       .then(res => {
         const items = res.data || [];
         setData(items);
+        
         const grouped = {};
-        items.slice(0, 50).forEach(c => {
+        items.forEach(c => {
           const month = new Date(c.period).toLocaleDateString('en', { month: 'short', year: '2-digit' });
-          if (!grouped[month]) grouped[month] = { month, employee: 0, employer: 0, total: 0 };
+          if (!grouped[month]) grouped[month] = { month, employee: 0, employer: 0, avc: 0, total: 0 };
           grouped[month].employee += (c.employee_amount || 0) / 100;
           grouped[month].employer += (c.employer_amount || 0) / 100;
+          grouped[month].avc += (c.avc_amount || 0) / 100;
           grouped[month].total += (c.total_amount || 0) / 100;
         });
         setChartData(Object.values(grouped).reverse());
+
+        const total = items.reduce((sum, c) => sum + (c.total_amount || 0), 0);
+        const employee = items.reduce((sum, c) => sum + (c.employee_amount || 0), 0);
+        const employer = items.reduce((sum, c) => sum + (c.employer_amount || 0), 0);
+        const avc = items.reduce((sum, c) => sum + (c.avc_amount || 0), 0);
+        setStats({
+          total: total / 100,
+          employee: employee / 100,
+          employer: employer / 100,
+          avc: avc / 100,
+          count: items.length,
+          avg: items.length > 0 ? (total / items.length) / 100 : 0
+        });
       })
       .catch(() => setData([]))
       .finally(() => setLoading(false));
   }, []);
 
+  const formatCurrency = (value) => {
+    if (value >= 1000000) return `KES ${(value / 1000000).toFixed(1)}M`;
+    if (value >= 1000) return `KES ${(value / 1000).toFixed(0)}K`;
+    return `KES ${value}`;
+  };
+
+  const paymentData = data.reduce((acc, c) => {
+    const method = c.payment_method || 'other';
+    if (!acc[method]) acc[method] = { name: method, value: 0, count: 0 };
+    acc[method].value += (c.total_amount || 0) / 100;
+    acc[method].count += 1;
+    return acc;
+  }, {});
+  const paymentChart = Object.values(paymentData).slice(0, 5);
+
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Contributions</h1>
-          <p className="text-neutral-500 mt-1">{data.length} records</p>
+          <h1 className="text-2xl font-bold tracking-tight text-black">Contributions</h1>
+          <p className="text-sm text-gray-500 mt-1">{data.length} contribution records</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-2xl text-sm font-medium hover:bg-neutral-50 transition-all">
-            <Download size={15} /> Export
+          <button className="btn btn-secondary flex items-center gap-2">
+            <Download size={14} /> Export
           </button>
-          <Link to="/contributions/new" className="btn-hover flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-2xl text-sm font-medium hover:bg-neutral-800 transition-all">
-            <Plus size={15} /> Record
+          <Link to="/contributions/new" className="btn btn-primary flex items-center gap-2">
+            <Plus size={14} /> Record
           </Link>
         </div>
       </div>
 
-      {/* Chart */}
-      {chartData.length > 0 && (
-        <div className="bg-white rounded-2xl border border-[#e8e9eb] p-5">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Monthly Trends</h2>
-          </div>
-          <ResponsiveContainer width="100%" height={280}>
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
-              <XAxis dataKey="month" fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} />
-              <YAxis fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} contentStyle={{ borderRadius: '12px', border: '1px solid #e7e5e4', boxShadow: 'none' }} />
-              <Bar dataKey="employee" fill="#171717" name="Employee" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="employer" fill="#a8a29e" name="Employer" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+      {/* Stats Cards - Uber Style */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {[
+            { icon: DollarSign, label: 'Total', value: formatCurrency(stats.total) },
+            { icon: Users, label: 'Employee', value: formatCurrency(stats.employee) },
+            { icon: Building2, label: 'Employer', value: formatCurrency(stats.employer) },
+            { icon: TrendingUp, label: 'AVC', value: formatCurrency(stats.avc) },
+            { icon: Calendar, label: 'Average', value: formatCurrency(stats.avg) },
+          ].map((stat, i) => (
+            <div key={i} className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <stat.icon size={14} className="text-gray-400" />
+                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
+              </div>
+              <p className="text-lg font-bold text-black">{stat.value}</p>
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Table */}
-      <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
+      {/* Charts */}
+      {chartData.length > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Trends Chart */}
+          <div className="bg-white border border-gray-200 rounded-lg p-5">
+            <h2 className="text-base font-semibold text-black mb-4">Contribution Trends</h2>
+            <ResponsiveContainer width="100%" height={260}>
+              <AreaChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
+                <XAxis dataKey="month" fontSize={11} tick={{ fill: '#666' }} axisLine={false} tickLine={false} />
+                <YAxis fontSize={11} tick={{ fill: '#666' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
+                <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{ borderRadius: '4px', border: '1px solid #e5e5e5' }} />
+                <Area type="monotone" dataKey="employee" stackId="1" stroke="#000" fill="#000" name="Employee" />
+                <Area type="monotone" dataKey="employer" stackId="1" stroke="#666" fill="#666" name="Employer" />
+                <Area type="monotone" dataKey="avc" stackId="1" stroke="#999" fill="#999" name="AVC" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Payment Methods */}
+          {paymentChart.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-lg p-5">
+              <h2 className="text-base font-semibold text-black mb-4">By Payment Method</h2>
+              <ResponsiveContainer width="100%" height={260}>
+                <PieChart>
+                  <Pie
+                    data={paymentChart}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={90}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {paymentChart.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(v) => formatCurrency(v)} contentStyle={{ borderRadius: '4px', border: '1px solid #e5e5e5' }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-4 justify-center mt-4">
+                {paymentChart.map((item, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                    <span className="text-xs text-gray-500 capitalize">{item.name}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Recent Contributions Table */}
+      <div className="card">
+        <div className="card-header">
+          <h2 className="text-base font-semibold text-black">Recent Contributions</h2>
+        </div>
         {loading ? (
-          <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
+          <div className="p-16 text-center">
+            <Loader2 size={24} className="animate-spin mx-auto text-gray-300" />
+          </div>
         ) : data.length === 0 ? (
-          <div className="p-16 text-center"><p className="text-sm text-neutral-400">No contributions found</p></div>
+          <div className="empty-state">
+            <p className="text-sm text-gray-400">No contributions found</p>
+          </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="table">
               <thead>
-                <tr className="border-b border-neutral-50">
-                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
-                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
-                  <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee</th>
-                  <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer</th>
-                  <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider hidden sm:table-cell">AVC</th>
-                  <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Total</th>
-                  <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Status</th>
+                <tr>
+                  <th className="text-left">Member</th>
+                  <th className="text-left">Period</th>
+                  <th className="text-right">Employee</th>
+                  <th className="text-right">Employer</th>
+                  <th className="text-right">AVC</th>
+                  <th className="text-right">Total</th>
+                  <th className="text-left">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-neutral-50">
-                {data.slice(0, 20).map(c => (
-                  <tr key={c.id} className="hover:bg-neutral-50/50 transition-colors">
-                    <td className="px-5 py-[18px] text-neutral-500">{new Date(c.period).toLocaleDateString()}</td>
-                    <td className="px-5 py-[18px] font-medium text-neutral-900">{c.member_name || c.member_id}</td>
-                    <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {((c.employee_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {((c.employer_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600 hidden sm:table-cell">KES {((c.avc_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-5 py-[18px] text-right font-mono text-xs font-semibold text-neutral-900">KES {((c.total_amount || 0) / 100).toLocaleString()}</td>
-                    <td className="px-5 py-[18px]">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${c.status === 'confirmed' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}`}>{c.status}</span>
+              <tbody>
+                {data.slice(0, 10).map((c) => (
+                  <tr key={c.id}>
+                    <td className="font-medium">{c.member_name || c.member_id}</td>
+                    <td className="text-gray-500">{new Date(c.period).toLocaleDateString()}</td>
+                    <td className="text-right font-mono text-sm">KES {(c.employee_amount / 100).toLocaleString()}</td>
+                    <td className="text-right font-mono text-sm">KES {(c.employer_amount / 100).toLocaleString()}</td>
+                    <td className="text-right font-mono text-sm">KES {(c.avc_amount / 100).toLocaleString()}</td>
+                    <td className="text-right font-mono text-sm font-semibold">KES {(c.total_amount / 100).toLocaleString()}</td>
+                    <td>
+                      <span className={`badge ${c.status === 'confirmed' ? 'badge-success' : 'badge-warning'}`}>
+                        {c.status || 'pending'}
+                      </span>
                     </td>
                   </tr>
                 ))}

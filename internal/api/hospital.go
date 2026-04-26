@@ -186,7 +186,76 @@ func (s *Server) handleRecordMedicalExpenditure(w http.ResponseWriter, r *http.R
 
 // handleListMedicalExpenditures handles GET /medical-expenditures
 func (s *Server) handleListMedicalExpenditures(w http.ResponseWriter, r *http.Request) {
-	respondError(w, http.StatusNotImplemented, "not yet implemented")
+	schemeID := r.URL.Query().Get("scheme_id")
+	if schemeID == "" {
+		schemeID = GetSchemeID(r)
+	}
+	if schemeID == "" {
+		respondError(w, http.StatusBadRequest, "scheme_id query parameter is required")
+		return
+	}
+
+	memberID := r.URL.Query().Get("member_id")
+	status := r.URL.Query().Get("status")
+	limit := r.URL.Query().Get("limit")
+	if limit == "" {
+		limit = "100"
+	}
+
+	query := `
+		SELECT id, member_id, scheme_id, hospital_id, date_of_service, date_submitted,
+		       service_type, description, amount_charged, amount_covered, member_responsibility,
+		       status, invoice_number, receipt_number, created_at, updated_at
+		FROM medical_expenditures WHERE scheme_id = $1
+	`
+	args := []interface{}{schemeID}
+	argCount := 1
+
+	if memberID != "" {
+		argCount++
+		query += fmt.Sprintf(" AND member_id = $%d", argCount)
+		args = append(args, memberID)
+	}
+	if status != "" {
+		argCount++
+		query += fmt.Sprintf(" AND status = $%d", argCount)
+		args = append(args, status)
+	}
+	argCount++
+	query += fmt.Sprintf(" ORDER BY date_of_service DESC LIMIT $%d", argCount)
+	args = append(args, limit)
+
+	rows, err := s.db.QueryContext(r.Context(), query, args...)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "query failed")
+		return
+	}
+	defer rows.Close()
+
+	var expenditures []map[string]interface{}
+	for rows.Next() {
+		var id, memberID, schemeID, hospitalID, serviceType, description, status, invoiceNum, receiptNum string
+		var amountCharged, amountCovered, memberResp int64
+		var dateOfService, dateSubmitted, createdAt, updatedAt time.Time
+		if err := rows.Scan(&id, &memberID, &schemeID, &hospitalID, &dateOfService, &dateSubmitted,
+			&serviceType, &description, &amountCharged, &amountCovered, &memberResp,
+			&status, &invoiceNum, &receiptNum, &createdAt, &updatedAt); err != nil {
+			continue
+		}
+		expenditures = append(expenditures, map[string]interface{}{
+			"id": id, "member_id": memberID, "scheme_id": schemeID, "hospital_id": hospitalID,
+			"date_of_service": dateOfService, "date_submitted": dateSubmitted,
+			"service_type": serviceType, "description": description,
+			"amount_charged": amountCharged, "amount_covered": amountCovered,
+			"member_responsibility": memberResp, "status": status,
+			"invoice_number": invoiceNum, "receipt_number": receiptNum,
+			"created_at": createdAt, "updated_at": updatedAt,
+		})
+	}
+	if expenditures == nil {
+		expenditures = []map[string]interface{}{}
+	}
+	respondJSON(w, http.StatusOK, expenditures)
 }
 
 // handleGetPendingBills handles GET /medical-expenditures/pending

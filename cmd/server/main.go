@@ -12,9 +12,18 @@ import (
 	"pension-manager/internal/api"
 	"pension-manager/internal/config"
 	"pension-manager/internal/db"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file from project root
+	if err := godotenv.Load(); err != nil {
+		slog.Warn("no .env file found, using environment variables")
+	} else {
+		slog.Info(".env file loaded successfully")
+	}
+
 	cfg, err := config.Load()
 	if err != nil {
 		slog.Error("failed to load config", "error", err)
@@ -26,14 +35,24 @@ func main() {
 	}))
 	slog.SetDefault(logger)
 
+	// Debug: log if NewsAPI key is loaded
+	if cfg.NewsAPI.APIKey != "" {
+		slog.Info("NewsAPI key loaded",
+			"length", len(cfg.NewsAPI.APIKey),
+			"key_prefix", string([]byte(cfg.NewsAPI.APIKey)[:8])+"...",
+			"key_suffix", "..."+string([]byte(cfg.NewsAPI.APIKey)[len(cfg.NewsAPI.APIKey)-8:]))
+	} else {
+		slog.Warn("NewsAPI key is empty - will use mock data")
+		slog.Info("Checking environment directly:",
+			"NEWS_API_KEY from os.Getenv:", os.Getenv("NEWS_API_KEY"))
+	}
+
 	database, err := db.New(cfg.DatabaseURL)
 	if err != nil {
 		slog.Error("failed to connect to database", "error", err)
 		os.Exit(1)
 	}
 	defer database.Close()
-
-	slog.Info("database connected")
 
 	server := api.New(database, cfg)
 

@@ -19,6 +19,7 @@ import (
 	"pension-manager/internal/portal"
 	"pension-manager/internal/reports"
 	"pension-manager/internal/security"
+	"pension-manager/internal/signature"
 	"pension-manager/internal/sms"
 	"pension-manager/internal/sponsor"
 	"pension-manager/internal/tax"
@@ -31,23 +32,24 @@ import (
 )
 
 type Server struct {
-	router          *chi.Mux
-	db              *db.DB
-	auth            *auth.Service
-	cfg             *config.Config
-	mpesaClient     *mpesa.Client
-	hospitalService *hospital.HospitalService
-	docService      *documents.Service
-	sponsorService  *sponsor.Service
-	portalService   *portal.Service
-	votingService   *voting.Service
-	bulkService     *bulk.Service
-	reportsService  *reports.Service
-	smsService      *sms.Service
-	taxReminderSvc  *tax.Service
-	ipBlacklistSvc  *security.Service
-	newsService     *news.Service
-	ussdService     *ussd.Service
+	router           *chi.Mux
+	db               *db.DB
+	auth             *auth.Service
+	cfg              *config.Config
+	mpesaClient      *mpesa.Client
+	hospitalService  *hospital.HospitalService
+	docService       *documents.Service
+	sponsorService   *sponsor.Service
+	portalService    *portal.Service
+	votingService    *voting.Service
+	bulkService      *bulk.Service
+	reportsService   *reports.Service
+	smsService       *sms.Service
+	taxReminderSvc   *tax.Service
+	ipBlacklistSvc   *security.Service
+	newsService      *news.Service
+	ussdService      *ussd.Service
+	signatureService *signature.Service
 }
 
 func New(database *db.DB, cfg *config.Config) *Server {
@@ -99,24 +101,27 @@ func New(database *db.DB, cfg *config.Config) *Server {
 		return ussd.NewService(ussdProvider, ussdVotingAdapter)
 	}()
 
+	signatureService := signature.NewService(database)
+
 	s := &Server{
-		router:          chi.NewRouter(),
-		db:              database,
-		auth:            authSvc,
-		cfg:             cfg,
-		mpesaClient:     mpesaClient,
-		hospitalService: hospitalService,
-		docService:      docService,
-		sponsorService:  sponsorService,
-		portalService:   portalService,
-		votingService:   votingService,
-		bulkService:     bulkService,
-		reportsService:  reportsService,
-		smsService:      smsService,
-		taxReminderSvc:  taxReminderSvc,
-		ipBlacklistSvc:  ipBlacklistSvc,
-		newsService:     newsService,
-		ussdService:     ussdService,
+		router:           chi.NewRouter(),
+		db:               database,
+		auth:             authSvc,
+		cfg:              cfg,
+		mpesaClient:      mpesaClient,
+		hospitalService:  hospitalService,
+		docService:       docService,
+		sponsorService:   sponsorService,
+		portalService:    portalService,
+		votingService:    votingService,
+		bulkService:      bulkService,
+		reportsService:   reportsService,
+		smsService:       smsService,
+		taxReminderSvc:   taxReminderSvc,
+		ipBlacklistSvc:   ipBlacklistSvc,
+		newsService:      newsService,
+		ussdService:      ussdService,
+		signatureService: signatureService,
 	}
 
 	s.mountMiddleware()
@@ -150,6 +155,7 @@ func (s *Server) mountRoutes() {
 	s.router.Get("/ready", s.readinessCheck)
 
 	s.router.Post("/api/auth/login", s.login)
+	s.router.Post("/api/auth/member-login", s.memberLogin)
 	s.router.Post("/api/auth/refresh", s.refreshToken)
 	s.router.Get("/api/auth/otp", s.requestOTP)
 	s.router.Post("/api/auth/unlock/{id}", s.unlockUser)
@@ -205,9 +211,16 @@ func (s *Server) mountRoutes() {
 
 		// Claims Management Routes
 		s.registerClaimsRoutes(r)
+		s.registerClaimsRoutesV2(r)
 
 		// Maker-Checker Workflow Routes
 		s.registerMakerCheckerRoutes(r)
+
+		// Member Management Routes (Maker-Checker)
+		s.registerMemberRoutes(r)
+
+		// Reconciliation Routes
+		s.registerReconciliationRoutes(r)
 
 		// Document Management Routes
 		s.registerDocumentRoutes(r)
@@ -241,6 +254,18 @@ func (s *Server) mountRoutes() {
 
 		// Kenya Government News Routes
 		s.registerNewsRoutes(r)
+
+		// Digital Signature Routes
+		s.registerSignatureRoutes(r)
+
+		// Tax Exemption Routes
+		s.registerTaxExemptionRoutes(r)
+
+		// Annual Statement Routes
+		s.registerAnnualStatementRoutes(r)
+
+		// Beneficiary Drawdown Routes
+		s.registerBeneficiaryDrawdownRoutes(r)
 	})
 }
 

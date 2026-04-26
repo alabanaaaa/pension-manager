@@ -56,7 +56,7 @@ export default function HospitalsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Hospital Management</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-black">Hospital Management</h1>
           <p className="text-neutral-500 mt-2 text-base">Manage hospital accounts, medical expenditures, and pending bills</p>
         </div>
         <div className="flex gap-3">

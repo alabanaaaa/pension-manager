@@ -1,0 +1,8 @@
+2026/04/10 19:01:03 INFO .env file loaded successfully
+{"time":"2026-04-10T19:01:03.021192+03:00","level":"INFO","msg":"NewsAPI key loaded","length":32,"key_prefix":"cd342a8b...","key_suffix":"...9126bb7e"}
+{"time":"2026-04-10T19:01:03.212507+03:00","level":"INFO","msg":"database connected","url":"postgres://fatoumata@localhost:5432/minidb?sslmode=disable"}
+{"time":"2026-04-10T19:01:03.212603+03:00","level":"WARN","msg":"M-Pesa not configured — STK Push will be simulated"}
+{"time":"2026-04-10T19:01:03.21263+03:00","level":"INFO","msg":"NewsAPI configured — fetching live Kenya government news"}
+{"time":"2026-04-10T19:01:03.21358+03:00","level":"INFO","msg":"starting server","port":8080,"env":"development"}
+{"time":"2026-04-10T19:01:03.214007+03:00","level":"ERROR","msg":"http server error","error":"listen tcp :8080: bind: address already in use"}
+exit status 1

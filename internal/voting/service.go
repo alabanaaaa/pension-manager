@@ -76,8 +76,8 @@ func (s *Service) GetElection(ctx context.Context, electionID string) (*domain.E
 // ListElections returns all elections for a scheme
 func (s *Service) ListElections(ctx context.Context, schemeID string) ([]*domain.Election, error) {
 	query := `
-		SELECT id, scheme_id, title, description, type, status, max_candidates,
-		       start_date, end_date, created_by, total_voters, total_votes, created_at, updated_at
+		SELECT id, scheme_id, title, description, COALESCE(election_type,''), status, max_candidates,
+		       COALESCE(start_date, NOW()), COALESCE(end_date, NOW()), COALESCE(created_by,''), total_voters, total_votes, created_at, updated_at
 		FROM elections WHERE scheme_id = $1 ORDER BY start_date DESC
 	`
 	rows, err := s.db.QueryContext(ctx, query, schemeID)

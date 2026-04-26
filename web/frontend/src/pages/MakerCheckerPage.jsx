@@ -66,7 +66,7 @@ export default function MakerCheckerPage() {
     <div className="space-y-8 animate-fade-in-up">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Maker-Checker</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-black">Maker-Checker</h1>
         <p className="text-neutral-500 mt-2 text-base">Review and approve pending changes</p>
       </div>
 

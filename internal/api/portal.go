@@ -61,24 +61,38 @@ func MemberPortalMiddleware(database *db.DB) func(http.Handler) http.Handler {
 				return
 			}
 
-			// Look up member_id from system_users
-			var memberID sql.NullString
-			err := database.QueryRowContext(r.Context(), `SELECT member_id FROM system_users WHERE id = $1`, userID).Scan(&memberID)
-			if err != nil || !memberID.Valid || memberID.String == "" {
-				respondError(w, http.StatusForbidden, "member portal access not enabled for this user")
-				return
+			var memberID string
+			var portalEnabled bool
+
+			// First, try to look up member_id from system_users (for staff logging in as member)
+			var memberIDFromUser sql.NullString
+			err := database.QueryRowContext(r.Context(), `SELECT member_id FROM system_users WHERE id = $1`, userID).Scan(&memberIDFromUser)
+			if err == nil && memberIDFromUser.Valid && memberIDFromUser.String != "" {
+				memberID = memberIDFromUser.String
+			} else {
+				// Check if user_id is directly a member ID (for direct member login)
+				err = database.QueryRowContext(r.Context(), `SELECT id, COALESCE(portal_enabled, true) FROM members WHERE id = $1`, userID).Scan(&memberID, &portalEnabled)
+				if err != nil {
+					respondError(w, http.StatusForbidden, "member portal access not enabled for this user")
+					return
+				}
+				if !portalEnabled {
+					respondError(w, http.StatusForbidden, "member portal access has been disabled by administrator")
+					return
+				}
 			}
 
-			// Check if member is locked out
-			var portalEnabled bool
-			err = database.QueryRowContext(r.Context(), `SELECT portal_enabled FROM members WHERE id = $1`, memberID.String).Scan(&portalEnabled)
-			if err == nil && !portalEnabled {
-				respondError(w, http.StatusForbidden, "member portal access has been disabled by administrator")
-				return
+			// Check if member is locked out (for system_users case)
+			if memberIDFromUser.Valid {
+				err = database.QueryRowContext(r.Context(), `SELECT COALESCE(portal_enabled, true) FROM members WHERE id = $1`, memberID).Scan(&portalEnabled)
+				if err == nil && !portalEnabled {
+					respondError(w, http.StatusForbidden, "member portal access has been disabled by administrator")
+					return
+				}
 			}
 
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, "member_id", memberID.String)
+			ctx = context.WithValue(ctx, "member_id", memberID)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

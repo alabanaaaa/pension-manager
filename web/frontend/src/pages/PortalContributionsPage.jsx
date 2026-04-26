@@ -30,7 +30,7 @@ export default function PortalContributionsPage() {
   return (
     <div className="space-y-8 animate-fade-in-up">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">My Contributions</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-black">My Contributions</h1>
         <p className="text-neutral-500 mt-2 text-base">View your contribution history</p>
       </div>
 

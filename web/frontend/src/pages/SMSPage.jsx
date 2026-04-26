@@ -43,7 +43,7 @@ export default function SMSPage() {
   return (
     <div className="space-y-8 animate-fade-in-up">
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">SMS Gateway</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-black">SMS Gateway</h1>
         <p className="text-neutral-500 mt-2 text-base">Send bulk messages and notifications</p>
       </div>
 

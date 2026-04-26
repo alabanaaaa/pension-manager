@@ -53,6 +53,7 @@ export function AuthProvider({ children }) {
 
   const value = {
     user,
+    setUser,
     loading,
     error,
     login,
@@ -60,6 +61,7 @@ export function AuthProvider({ children }) {
     isAuthenticated: !!user,
     isAdmin: user?.role === 'admin' || user?.role === 'super_admin',
     isOfficer: user?.role === 'pension_officer' || user?.role === 'admin' || user?.role === 'super_admin',
+    isMember: user?.role === 'member',
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

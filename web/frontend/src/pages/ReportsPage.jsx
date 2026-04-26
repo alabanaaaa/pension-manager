@@ -31,70 +31,77 @@ export default function ReportsPage() {
   ];
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+    <div className="space-y-6">
+      <div className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Reports</h1>
-          <p className="text-neutral-500 mt-1">Contribution analysis and trends</p>
+          <h1 className="text-2xl font-bold tracking-tight text-black">Reports</h1>
+          <p className="text-sm text-gray-500 mt-1">Contribution analysis and trends</p>
         </div>
-        <button className="btn-hover flex items-center gap-2 px-4 py-2.5 border border-neutral-200 rounded-2xl text-sm font-medium hover:bg-neutral-50 transition-all">
-          <Download size={15} /> Export
+        <button className="btn btn-secondary flex items-center gap-2">
+          <Download size={14} /> Export
         </button>
       </div>
 
-      <div className="flex gap-1 bg-neutral-100 p-1 rounded-2xl w-fit">
+      {/* Tabs */}
+      <div className="tabs">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-400 hover:text-neutral-600'}`}
+            className={`tab ${activeTab === tab.id ? 'active' : ''}`}
           >
-            <tab.icon size={14} />
             {tab.label}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="p-16 text-center"><Loader2 size={24} className="animate-spin mx-auto text-neutral-300" /><p className="text-sm text-neutral-400 mt-3">Loading...</p></div>
+        <div className="p-16 text-center">
+          <Loader2 size={24} className="animate-spin mx-auto text-gray-300" />
+          <p className="text-sm text-gray-400 mt-3">Loading...</p>
+        </div>
       ) : (
         <>
           {activeTab === 'breakdown' && (
-            <div className="space-y-8">
-              <div className="bg-white rounded-2xl border border-[#e8e9eb] p-5">
-                <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Monthly Breakdown</h2>
-                {breakdown.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={280}>
-                    <BarChart data={breakdown}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
-                      <XAxis dataKey="period" fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} />
-                      <YAxis fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
-                      <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} contentStyle={{ borderRadius: '12px', border: '1px solid #e7e5e4', boxShadow: 'none' }} />
-                      <Bar dataKey="employee_total" fill="#171717" name="Employee" radius={[4, 4, 0, 0]} />
-                      <Bar dataKey="employer_total" fill="#a8a29e" name="Employer" radius={[4, 4, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : <p className="text-neutral-400 text-center py-12">No data available</p>}
+            <div className="space-y-6">
+              <div className="card">
+                <div className="card-header">
+                  <h2 className="text-base font-semibold text-black">Monthly Breakdown</h2>
+                </div>
+                <div className="card-body">
+                  {breakdown.length > 0 ? (
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={breakdown}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
+                        <XAxis dataKey="period" fontSize={11} tick={{ fill: '#666' }} axisLine={false} tickLine={false} />
+                        <YAxis fontSize={11} tick={{ fill: '#666' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
+                        <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} contentStyle={{ borderRadius: '4px', border: '1px solid #e5e5e5' }} />
+                        <Bar dataKey="employee_total" fill="#000" name="Employee" radius={[2, 2, 0, 0]} />
+                        <Bar dataKey="employer_total" fill="#999" name="Employer" radius={[2, 2, 0, 0]} />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  ) : <p className="text-gray-400 text-center py-12">No data available</p>}
+                </div>
               </div>
-              <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
-                <table className="w-full text-sm">
+              <div className="card">
+                <table className="table">
                   <thead>
-                    <tr className="border-b border-neutral-50">
-                      <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Period</th>
-                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employees</th>
-                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee Total</th>
-                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer Total</th>
-                      <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Grand Total</th>
+                    <tr>
+                      <th className="text-left">Period</th>
+                      <th className="text-right">Employees</th>
+                      <th className="text-right">Employee Total</th>
+                      <th className="text-right">Employer Total</th>
+                      <th className="text-right">Grand Total</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-50">
+                  <tbody>
                     {breakdown.map((b, i) => (
-                      <tr key={i} className="hover:bg-neutral-50/50 transition-colors">
-                        <td className="px-5 py-[18px] font-medium text-neutral-900">{b.period}</td>
-                        <td className="px-5 py-[18px] text-right text-neutral-500">{b.employee_count}</td>
-                        <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(b.employee_total / 100).toLocaleString()}</td>
-                        <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(b.employer_total / 100).toLocaleString()}</td>
-                        <td className="px-5 py-[18px] text-right font-mono text-xs font-semibold text-neutral-900">KES {(b.grand_total / 100).toLocaleString()}</td>
+                      <tr key={i}>
+                        <td className="font-medium text-black">{b.period}</td>
+                        <td className="text-right text-gray-500">{b.employee_count}</td>
+                        <td className="text-right font-mono text-sm">KES {(b.employee_total / 100).toLocaleString()}</td>
+                        <td className="text-right font-mono text-sm">KES {(b.employer_total / 100).toLocaleString()}</td>
+                        <td className="text-right font-mono text-sm font-semibold">KES {(b.grand_total / 100).toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -104,40 +111,44 @@ export default function ReportsPage() {
           )}
 
           {activeTab === 'trends' && (
-            <div className="bg-white rounded-2xl border border-[#e8e9eb] p-5">
-              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-6">Contribution Trends</h2>
-              {trends.length > 0 ? (
-                <ResponsiveContainer width="100%" height={280}>
-                  <LineChart data={trends}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f5f5f4" />
-                    <XAxis dataKey="month" fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} />
-                    <YAxis fontSize={12} tick={{ fill: '#a8a29e' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
-                    <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} contentStyle={{ borderRadius: '12px', border: '1px solid #e7e5e4', boxShadow: 'none' }} />
-                    <Line type="monotone" dataKey="total_amount" stroke="#171717" strokeWidth={2} name="Total" dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : <p className="text-neutral-400 text-center py-12">No data available</p>}
+            <div className="card">
+              <div className="card-header">
+                <h2 className="text-base font-semibold text-black">Contribution Trends</h2>
+              </div>
+              <div className="card-body">
+                {trends.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={280}>
+                    <LineChart data={trends}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e5e5" />
+                      <XAxis dataKey="month" fontSize={11} tick={{ fill: '#666' }} axisLine={false} tickLine={false} />
+                      <YAxis fontSize={11} tick={{ fill: '#666' }} axisLine={false} tickLine={false} tickFormatter={(v) => `KES ${(v/1000).toFixed(0)}k`} />
+                      <Tooltip formatter={(v) => `KES ${v.toLocaleString()}`} contentStyle={{ borderRadius: '4px', border: '1px solid #e5e5e5' }} />
+                      <Line type="monotone" dataKey="total_amount" stroke="#000" strokeWidth={2} name="Total" dot={false} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : <p className="text-gray-400 text-center py-12">No data available</p>}
+              </div>
             </div>
           )}
 
           {activeTab === 'ytd' && (
-            <div className="bg-white rounded-2xl border border-[#e8e9eb] overflow-hidden">
-              <table className="w-full text-sm">
+            <div className="card">
+              <table className="table">
                 <thead>
-                  <tr className="border-b border-neutral-50">
-                    <th className="text-left px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Member</th>
-                    <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employee YTD</th>
-                    <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Employer YTD</th>
-                    <th className="text-right px-5 py-[18px] font-medium text-neutral-400 text-xs uppercase tracking-wider">Total YTD</th>
+                  <tr>
+                    <th className="text-left">Member</th>
+                    <th className="text-right">Employee YTD</th>
+                    <th className="text-right">Employer YTD</th>
+                    <th className="text-right">Total YTD</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-neutral-50">
+                <tbody>
                   {ytd.slice(0, 20).map((y, i) => (
-                    <tr key={i} className="hover:bg-neutral-50/50 transition-colors">
-                      <td className="px-5 py-[18px] font-medium text-neutral-900">{y.full_name}</td>
-                      <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(y.employee_ytd / 100).toLocaleString()}</td>
-                      <td className="px-5 py-[18px] text-right font-mono text-xs text-neutral-600">KES {(y.employer_ytd / 100).toLocaleString()}</td>
-                      <td className="px-5 py-[18px] text-right font-mono text-xs font-semibold text-neutral-900">KES {(y.total_ytd / 100).toLocaleString()}</td>
+                    <tr key={i}>
+                      <td className="font-medium text-black">{y.full_name}</td>
+                      <td className="text-right font-mono text-sm">KES {(y.employee_ytd / 100).toLocaleString()}</td>
+                      <td className="text-right font-mono text-sm">KES {(y.employer_ytd / 100).toLocaleString()}</td>
+                      <td className="text-right font-mono text-sm font-semibold">KES {(y.total_ytd / 100).toLocaleString()}</td>
                     </tr>
                   ))}
                 </tbody>

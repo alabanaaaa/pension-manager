@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { dashboard, pendingChanges } from '../lib/api';
 import { useAuth } from '../context/AuthContext';
+import { AnimatedNumber } from '../components';
 import {
-  Users, CreditCard, FileText, Vote, TrendingUp,
-  AlertTriangle, CheckCircle, Clock, ArrowUpRight,
-  ArrowDownRight, Activity, Building2, Shield,
-  ChevronRight, Calendar
+  Users, CreditCard, FileText, Vote,
+  AlertTriangle, Clock, Activity, Shield,
+  ArrowRight, Calendar
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -18,9 +18,9 @@ export default function DashboardPage() {
   const getGreeting = () => {
     const hour = new Date().getHours();
     const name = user?.name?.split(' ')[0] || 'User';
-    if (hour < 12) return { text: `Good morning, ${name}`, emoji: '☀️' };
-    if (hour < 17) return { text: `Good afternoon, ${name}`, emoji: '🌤️' };
-    return { text: `Good evening, ${name}`, emoji: '🌙' };
+    if (hour < 12) return `Good morning, ${name}`;
+    if (hour < 17) return `Good afternoon, ${name}`;
+    return `Good evening, ${name}`;
   };
 
   useEffect(() => {
@@ -37,122 +37,115 @@ export default function DashboardPage() {
   const greeting = getGreeting();
 
   const statCards = [
-    { label: 'Total Members', value: stats?.total_members ?? '—', icon: Users, color: 'blue', change: stats?.member_growth, href: '/members' },
-    { label: 'Active Members', value: stats?.active_members ?? '—', icon: Activity, color: 'emerald', href: '/members' },
-    { label: 'Contributions', value: stats?.total_contributions ? `KES ${(stats.total_contributions / 1000000).toFixed(1)}M` : '—', icon: CreditCard, color: 'violet', href: '/contributions' },
-    { label: 'Pending Claims', value: stats?.pending_claims ?? '—', icon: FileText, color: 'amber', href: '/claims' },
-    { label: 'Active Elections', value: stats?.active_elections ?? '—', icon: Vote, color: 'sky', href: '/voting' },
-    { label: 'Pending Approvals', value: pendingCount?.total ?? '—', icon: Clock, color: 'rose', href: '/maker-checker' },
+    { label: 'Total Members', value: stats?.total_members ?? 0, icon: Users, href: '/members' },
+    { label: 'Active Members', value: stats?.active_members ?? 0, icon: Activity, href: '/members' },
+    { label: 'Contributions', value: stats?.total_contributions ? Math.round(stats.total_contributions / 1000000 * 10) / 10 : 0, prefix: '', suffix: 'M', icon: CreditCard, href: '/contributions' },
+    { label: 'Pending Claims', value: stats?.pending_claims ?? 0, icon: FileText, href: '/claims' },
+    { label: 'Active Elections', value: stats?.active_elections ?? 0, icon: Vote, href: '/voting' },
+    { label: 'Pending Approvals', value: pendingCount?.total ?? 0, icon: Clock, href: '/maker-checker' },
   ];
 
-  const colorMap = {
-    blue: { bg: 'bg-blue-50', text: 'text-blue-600', icon: 'text-blue-600' },
-    emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: 'text-emerald-600' },
-    violet: { bg: 'bg-violet-50', text: 'text-violet-600', icon: 'text-violet-600' },
-    amber: { bg: 'bg-amber-50', text: 'text-amber-600', icon: 'text-amber-600' },
-    sky: { bg: 'bg-sky-50', text: 'text-sky-600', icon: 'text-sky-600' },
-    rose: { bg: 'bg-rose-50', text: 'text-rose-600', icon: 'text-rose-600' },
-  };
-
   const recentActivity = [
-    { icon: Users, label: 'New member registered', time: '2 min ago', color: 'blue' },
-    { icon: CreditCard, label: 'Contribution received - KES 50,000', time: '15 min ago', color: 'emerald' },
-    { icon: FileText, label: 'Claim #CLM-042 submitted', time: '1 hour ago', color: 'amber' },
-    { icon: Vote, label: 'Election "Trustee 2026" opened', time: '3 hours ago', color: 'sky' },
-    { icon: Shield, label: 'Member details updated (pending approval)', time: '5 hours ago', color: 'violet' },
+    { icon: Users, label: 'New member registered', time: '2 min ago' },
+    { icon: CreditCard, label: 'Contribution received - KES 50,000', time: '15 min ago' },
+    { icon: FileText, label: 'Claim #CLM-042 submitted', time: '1 hour ago' },
+    { icon: Vote, label: 'Election "Trustee 2026" opened', time: '3 hours ago' },
+    { icon: Shield, label: 'Member details updated', time: '5 hours ago' },
   ];
 
   const quickLinks = [
-    { label: 'Add Member', desc: 'Register a new scheme member', href: '/members/new', icon: Users, color: 'blue' },
-    { label: 'Record Contribution', desc: 'Log a member contribution', href: '/contributions/new', icon: CreditCard, color: 'emerald' },
-    { label: 'New Claim', desc: 'Process a benefit claim', href: '/claims/new', icon: FileText, color: 'amber' },
-    { label: 'Create Election', desc: 'Set up a new voting election', href: '/voting/new', icon: Vote, color: 'sky' },
+    { label: 'Add Member', desc: 'Register a new scheme member', href: '/members/new', icon: Users },
+    { label: 'Record Contribution', desc: 'Log a member contribution', href: '/contributions/new', icon: CreditCard },
+    { label: 'New Claim', desc: 'Process a benefit claim', href: '/claims/new', icon: FileText },
+    { label: 'Create Election', desc: 'Set up a new voting election', href: '/voting/new', icon: Vote },
   ];
 
   return (
     <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-end justify-between animate-fade-in-up">
-        <div>
-          <p className="text-sm text-neutral-400 mb-1">{greeting.emoji} {greeting.text}</p>
-          <h1 className="text-3xl font-semibold tracking-tight text-neutral-900">Dashboard</h1>
-          <p className="text-neutral-500 mt-2 text-base">Overview of your pension management system</p>
+      {/* Header - Uber Minimal */}
+      <div className="flex items-end justify-between">
+        <div className="animate-fade-in-up">
+          <p className="text-sm text-gray-500 mb-1">{greeting}</p>
+          <h1 className="text-2xl font-bold tracking-tight text-black">Dashboard</h1>
+          <p className="text-sm text-gray-500 mt-1">Overview of your pension management system</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-neutral-400">
+        <div className="hidden sm:flex items-center gap-2 text-sm text-gray-400 animate-fade-in">
           <Calendar size={14} />
           <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Stats Grid - Uber Style */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {statCards.map((stat, i) => (
           <Link
             key={stat.label}
             to={stat.href}
-            className="btn-hover group bg-white rounded-2xl p-6 hover:shadow-sm border border-neutral-100 transition-all animate-fade-in-up"
-            style={{ animationDelay: `${i * 0.05}s` }}
+            className="group bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-150 cursor-pointer"
+            style={{ animationDelay: `${i * 50}ms` }}
           >
             <div className="flex items-start justify-between mb-4">
-              <div className={`p-2.5 rounded-xl ${colorMap[stat.color].bg}`}>
-                <stat.icon size={20} className={colorMap[stat.color].icon} />
+              <div className="p-2 border border-gray-200 rounded group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-150">
+                <stat.icon size={18} className="text-black group-hover:text-white transition-colors" />
               </div>
-              {stat.change !== undefined && (
-                <div className={`flex items-center gap-0.5 text-xs font-medium px-2.5 py-1 rounded-full ${stat.change >= 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                  {stat.change >= 0 ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
-                  {Math.abs(stat.change)}%
-                </div>
-              )}
+              <ArrowRight size={14} className="text-gray-300 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
             </div>
-            <p className="text-sm text-neutral-500">{stat.label}</p>
-            <p className="text-2xl font-semibold tracking-tight text-neutral-900 mt-1">{loading ? '—' : stat.value}</p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{stat.label}</p>
+            <p className="text-2xl font-bold tracking-tight text-black mt-1">
+              {loading ? '—' : (
+                stat.prefix ? `${stat.prefix}${stat.value}` : stat.value
+              )}
+            </p>
           </Link>
         ))}
       </div>
 
-      {/* Main content grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Quick actions */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Quick Actions</h2>
-            <ChevronRight size={16} className="text-neutral-300" />
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Quick Actions - Uber Style */}
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg animate-fade-in-up" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 className="text-base font-semibold text-black">Quick Actions</h2>
           </div>
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-3">
             {quickLinks.map((action, i) => (
               <Link
                 key={action.label}
                 to={action.href}
-                className="btn-hover group flex items-start gap-4 p-5 rounded-xl bg-neutral-50 hover:bg-neutral-100 transition-all animate-fade-in-up"
-                style={{ animationDelay: `${0.35 + i * 0.05}s` }}
+                className="group flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-black hover:bg-gray-50/50 transition-all duration-150"
+                style={{ animationDelay: `${300 + i * 50}ms` }}
               >
-                <div className={`p-2.5 rounded-xl ${colorMap[action.color].bg} flex-shrink-0`}>
-                  <action.icon size={18} className={colorMap[action.color].icon} />
+                <div className="p-2.5 border border-gray-200 rounded group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-150">
+                  <action.icon size={18} className="text-black group-hover:text-white transition-colors" />
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-neutral-900">{action.label}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5">{action.desc}</p>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-black">{action.label}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{action.desc}</p>
                 </div>
+                <ArrowRight size={14} className="text-gray-300 group-hover:text-black group-hover:translate-x-1 transition-all" />
               </Link>
             ))}
           </div>
         </div>
 
-        {/* Recent activity */}
-        <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Recent Activity</h2>
-            <ChevronRight size={16} className="text-neutral-300" />
+        {/* Recent Activity */}
+        <div className="bg-white border border-gray-200 rounded-lg animate-fade-in-up" style={{ animationDelay: '250ms' }}>
+          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <h2 className="text-base font-semibold text-black">Recent Activity</h2>
           </div>
-          <div className="p-6 space-y-5">
+          <div className="p-5 space-y-4">
             {recentActivity.map((item, i) => (
-              <div key={i} className="flex items-start gap-3 animate-fade-in-up" style={{ animationDelay: `${0.45 + i * 0.05}s` }}>
-                <div className={`p-2 rounded-lg ${colorMap[item.color].bg} flex-shrink-0 mt-0.5`}>
-                  <item.icon size={14} className={colorMap[item.color].icon} />
+              <div 
+                key={i} 
+                className="flex items-start gap-3" 
+                style={{ animationDelay: `${350 + i * 50}ms` }}
+              >
+                <div className="p-2 border border-gray-200 rounded flex-shrink-0 mt-0.5 group-hover:border-black transition-colors">
+                  <item.icon size={14} className="text-black" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-neutral-700 truncate">{item.label}</p>
-                  <p className="text-xs text-neutral-400 mt-0.5">{item.time}</p>
+                  <p className="text-sm text-black truncate">{item.label}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">{item.time}</p>
                 </div>
               </div>
             ))}
@@ -160,71 +153,28 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Pending approvals alert */}
+      {/* Pending Approvals Alert - Uber Style */}
       {pendingCount && pendingCount.total > 0 && (
-        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-6 animate-fade-in-up">
+        <div className="bg-black text-white rounded-lg p-5 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-amber-100 rounded-xl">
-              <AlertTriangle size={20} className="text-amber-600" />
+            <div className="p-2.5 bg-white/10 rounded">
+              <AlertTriangle size={20} className="text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="font-medium text-amber-900">Pending Approvals</h3>
-              <p className="text-sm text-amber-600 mt-0.5">
-                {pendingCount.members} member changes · {pendingCount.beneficiaries} beneficiary changes · {pendingCount.claims} claim changes
+              <h3 className="font-semibold text-white">Pending Approvals</h3>
+              <p className="text-sm text-gray-300 mt-0.5">
+                {pendingCount.members} member · {pendingCount.beneficiaries} beneficiary · {pendingCount.claims} claim
               </p>
             </div>
-            <Link to="/maker-checker" className="btn-hover px-5 py-2.5 bg-amber-600 text-white rounded-xl text-sm font-medium hover:bg-amber-700 transition-all flex-shrink-0">
-              Review All
+            <Link 
+              to="/maker-checker" 
+              className="px-5 py-2.5 bg-white text-black text-sm font-semibold rounded hover:bg-gray-100 transition-colors flex-shrink-0 hover:scale-105 transition-transform"
+            >
+              Review
             </Link>
           </div>
         </div>
       )}
-
-      {/* Bottom stats row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">Scheme Overview</h2>
-          </div>
-          <div className="px-6 py-4 space-y-0">
-            {[
-              { label: 'DB Scheme Members', value: '—', icon: Building2 },
-              { label: 'DC Scheme Members', value: '—', icon: Building2 },
-              { label: 'Medical Fund Members', value: '—', icon: Activity },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-4 border-b border-neutral-50 last:border-0">
-                <div className="flex items-center gap-3">
-                  <item.icon size={16} className="text-neutral-400" />
-                  <span className="text-sm text-neutral-600">{item.label}</span>
-                </div>
-                <span className="text-sm font-medium text-neutral-900">{item.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-2xl border border-neutral-100 overflow-hidden animate-fade-in-up" style={{ animationDelay: '0.55s' }}>
-          <div className="flex items-center justify-between px-6 py-5 border-b border-neutral-50">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900">System Status</h2>
-          </div>
-          <div className="px-6 py-4 space-y-0">
-            {[
-              { label: 'Database', status: 'Connected', ok: true },
-              { label: 'M-Pesa Integration', status: 'Sandbox', ok: true },
-              { label: 'SMS Gateway', status: 'Mock Mode', ok: true },
-              { label: 'News API', status: 'Mock Mode', ok: true },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-4 border-b border-neutral-50 last:border-0">
-                <span className="text-sm text-neutral-600">{item.label}</span>
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${item.ok ? 'bg-emerald-500' : 'bg-red-500'} animate-pulse`} />
-                  <span className="text-sm text-neutral-500">{item.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
