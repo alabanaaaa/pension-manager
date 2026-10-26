@@ -53,13 +53,27 @@ jobs:
       - name: Run database migrations
         run: |
           set -euo pipefail
-          for file in migrations/*_up.sql; do
-            echo "Applying ${file}"
-            PGPASSWORD=pension psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
-          done
-          if [ -f migrations/seed_admin.sql ]; then
-            PGPASSWORD=pension psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seed_admin.sql
+          if [ ! -d migrations ]; then
+            echo "migrations directory not found" >&2
+            exit 1
           fi
+          echo "Migration files found:"
+          find migrations -maxdepth 1 -type f -name '*_up.sql' -print | sort
+          migrations="$(find migrations -maxdepth 1 -type f -name '*_up.sql' -print | sort)"
+          if [ -z "$migrations" ]; then
+            echo "No migration files ending in _up.sql were found" >&2
+            exit 1
+          fi
+          while IFS= read -r file; do
+            echo "Applying ${file}"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done <<< "$migrations"
+          if [ -f migrations/seed_admin.sql ]; then
+            echo "Applying migrations/seed_admin.sql"
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seed_admin.sql
+          fi
+        env:
+          PGPASSWORD: pension
 
       - name: Check Go formatting
         run: |
