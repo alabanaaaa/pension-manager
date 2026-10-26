@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Go Backend
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: pension_test
+          POSTGRES_USER: pension
+          POSTGRES_PASSWORD: pension
+        options: >-
+          --health-cmd "pg_isready -U pension -d pension_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgres://pension:pension@localhost:5432/pension_test?sslmode=disable
+      HTTP_PORT: "8080"
+      APP_ENV: test
+      LOG_LEVEL: warn
+      JWT_SECRET: ci-jwt-secret-change-me
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo -S -p '' apt-get install -y postgresql-client
+
+      - name: Run database migrations
+        run: |
+          set -euo pipefail
+          for file in migrations/*_up.sql; do
+            echo "Applying ${file}"
+            PGPASSWORD=pension psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$file"
+          done
+          if [ -f migrations/seed_admin.sql ]; then
+            PGPASSWORD=pension psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/seed_admin.sql
+          fi
+
+      - name: Check Go formatting
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "The following files are not formatted:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test ./...
+
+      - name: Build server
+        run: go build -trimpath -o bin/pension-server ./cmd/server
+
+      - name: Upload server binary
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pension-server
+          path: bin/pension-server
+
+  frontend:
+    name: React Frontend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: web/frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: web/frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: web/frontend
+        run: npm run lint
+
+      - name: Build
+        working-directory: web/frontend
+        run: npm run build

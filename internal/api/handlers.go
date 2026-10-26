@@ -1,10 +1,10 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
-	"bytes"
 	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"

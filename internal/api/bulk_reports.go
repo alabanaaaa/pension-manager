@@ -17,7 +17,7 @@ func (s *Server) registerBulkRoutes(r chi.Router) {
 
 		r.Route("/api/bulk", func(r chi.Router) {
 			r.Post("/import/members", s.handleImportMembers)
-		r.Post("/import/statement", s.handleImportStatement)
+			r.Post("/import/statement", s.handleImportStatement)
 			r.Post("/validate", s.handleValidateBulkUpdate)
 			r.Post("/process/retirements", s.handleProcessRetirements)
 			r.Post("/process/early-leavers", s.handleProcessEarlyLeavers)

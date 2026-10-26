@@ -103,7 +103,10 @@ func TestParseMemberStatementWorkbookNoRows(t *testing.T) {
 }
 
 func TestParseStatementDate(t *testing.T) {
-	cases := []struct{ in string; ok bool }{
+	cases := []struct {
+		in string
+		ok bool
+	}{
 		{"04-30-13", true},
 		{"2013-04-30", true},
 		{"30/04/2013", true},
