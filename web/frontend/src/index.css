@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./styles/uber-design.css";
+@import "./styles/aljazeera-design.css";
 
 :root {
   --white: #ffffff;

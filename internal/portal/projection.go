@@ -101,7 +101,9 @@ func ProjectBenefits(params ProjectionParams) *ProjectionResult {
 		estimatedMonthly = annualPension / 12
 		// 1/3 commutation
 		estimatedLumpSum = balance / 3
-		irr = float64(annualPension) / float64(finalSalary) * 100
+		if finalSalary != 0 {
+			irr = float64(annualPension) / float64(finalSalary) * 100
+		}
 	} else {
 		// DC: Use accumulated balance
 		// 2/3 lump sum, 1/3 annuity
@@ -110,7 +112,11 @@ func ProjectBenefits(params ProjectionParams) *ProjectionResult {
 		// Annuity factor (simplified - 20 year annuity at 5%)
 		annuityFactor := 12.462 // PV of 1/month for 20 years at 5%
 		estimatedMonthly = int64(float64(annuityAmount) / annuityFactor)
-		irr = float64(estimatedMonthly*12) / float64(salary) * 100
+		if salary != 0 {
+			irr = float64(estimatedMonthly*12) / float64(salary) * 100
+		} else {
+			irr = 0
+		}
 	}
 
 	return &ProjectionResult{

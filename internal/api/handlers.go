@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"database/sql"
+	"bytes"
 	"encoding/csv"
 	"encoding/hex"
 	"encoding/json"
@@ -21,6 +22,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/lib/pq"
+	"github.com/xuri/excelize/v2"
 )
 
 func (s *Server) healthCheck(w http.ResponseWriter, r *http.Request) {
@@ -308,7 +310,7 @@ func (s *Server) listMembers(w http.ResponseWriter, r *http.Request) {
 	status := r.URL.Query().Get("status")
 	search := r.URL.Query().Get("search")
 
-	query := `SELECT id, member_no, first_name, last_name, id_number, phone, email, membership_status, department, account_balance, date_joined_scheme, created_at FROM members WHERE scheme_id = $1`
+	query := `SELECT id, member_no, first_name, last_name, id_number, COALESCE(phone, ''), COALESCE(email, ''), membership_status, COALESCE(department, ''), account_balance, date_joined_scheme, created_at FROM members WHERE scheme_id = $1`
 	args := []interface{}{schemeID}
 	argCount := 1
 
@@ -334,15 +336,21 @@ func (s *Server) listMembers(w http.ResponseWriter, r *http.Request) {
 
 	var members []map[string]interface{}
 	for rows.Next() {
-		var id, memberNo, firstName, lastName, idNumber, phone, email, st, dept string
+		var id, memberNo, firstName, lastName, phone, email, st, dept string
+		var idNumber sql.NullString
 		var balance int64
 		var dateJoined, createdAt time.Time
 		if err := rows.Scan(&id, &memberNo, &firstName, &lastName, &idNumber, &phone, &email, &st, &dept, &balance, &dateJoined, &createdAt); err != nil {
+			slog.Error("list member scan failed", "error", err)
 			continue
+		}
+		memberIDNumber := ""
+		if idNumber.Valid {
+			memberIDNumber = idNumber.String
 		}
 		members = append(members, map[string]interface{}{
 			"id": id, "member_no": memberNo, "first_name": firstName, "last_name": lastName,
-			"id_number": idNumber, "phone": phone, "email": email, "membership_status": st,
+			"id_number": memberIDNumber, "phone": phone, "email": email, "membership_status": st,
 			"department": dept, "account_balance": balance, "date_joined_scheme": dateJoined, "created_at": createdAt,
 		})
 	}
@@ -357,11 +365,35 @@ func (s *Server) createMember(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
 	var req struct {
-		MemberNo, FirstName, LastName, OtherNames, Gender, DateOfBirth, Nationality, IDNumber, KRAPIN    string
-		Email, Phone, PostalAddress, PostalCode, Town, MaritalStatus, SpouseName                         string
-		NextOfKin, NextOfKinPhone, BankName, BankBranch, BankAccount, PayrollNo, Designation, Department string
-		SponsorID, DateFirstAppt, DateJoinedScheme, ExpectedRetire                                       string
-		BasicSalary                                                                                      int64
+		MemberNo         string `json:"member_no"`
+		FirstName        string `json:"first_name"`
+		LastName         string `json:"last_name"`
+		OtherNames       string `json:"other_names"`
+		Gender           string `json:"gender"`
+		DateOfBirth      string `json:"date_of_birth"`
+		Nationality      string `json:"nationality"`
+		IDNumber         string `json:"id_number"`
+		KRAPIN           string `json:"kra_pin"`
+		Email            string `json:"email"`
+		Phone            string `json:"phone"`
+		PostalAddress    string `json:"postal_address"`
+		PostalCode       string `json:"postal_code"`
+		Town             string `json:"town"`
+		MaritalStatus    string `json:"marital_status"`
+		SpouseName       string `json:"spouse_name"`
+		NextOfKin        string `json:"next_of_kin"`
+		NextOfKinPhone   string `json:"next_of_kin_phone"`
+		BankName         string `json:"bank_name"`
+		BankBranch       string `json:"bank_branch"`
+		BankAccount      string `json:"bank_account"`
+		PayrollNo        string `json:"payroll_no"`
+		Designation      string `json:"designation"`
+		Department       string `json:"department"`
+		SponsorID        string `json:"sponsor_id"`
+		DateFirstAppt    string `json:"date_first_appt"`
+		DateJoinedScheme string `json:"date_joined_scheme"`
+		ExpectedRetire   string `json:"expected_retirement"`
+		BasicSalary      int64  `json:"basic_salary"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -384,7 +416,7 @@ func (s *Server) createMember(w http.ResponseWriter, r *http.Request) {
 			postal_code, town, marital_status, spouse_name, next_of_kin, next_of_kin_phone,
 			bank_name, bank_branch, bank_account, payroll_no, designation, department,
 			sponsor_id, date_first_appt, date_joined_scheme, expected_retirement, basic_salary)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,NULLIF($25, '')::uuid,$26,$27,$28,$29,$30)
 		RETURNING id
 	`, schemeID, req.MemberNo, req.FirstName, req.LastName, req.OtherNames, req.Gender,
 		dob, req.Nationality, req.IDNumber, req.KRAPIN, req.Email, req.Phone,
@@ -418,19 +450,21 @@ func (s *Server) getMember(w http.ResponseWriter, r *http.Request) {
 	var m domain.Member
 	var dob, djs, er, dfa sql.NullTime
 	var idNum, kraPin, email, phone, spouse, bankAcct sql.NullString
+	var maritalStatus, otherNames, nationality, bankName, bankBranch sql.NullString
+	var lastContribution sql.NullTime
 	err := s.db.QueryRowContext(r.Context(), `
-		SELECT id, scheme_id, member_no, first_name, last_name, other_names, gender,
-			date_of_birth, nationality, id_number, kra_pin, email, phone, marital_status,
-			spouse_name, bank_name, bank_branch, bank_account, payroll_no, designation,
-			department, date_first_appt, date_joined_scheme, expected_retirement,
+		SELECT id, scheme_id, member_no, first_name, last_name, other_names, COALESCE(gender, ''),
+			date_of_birth, COALESCE(nationality, ''), id_number, kra_pin, email, phone, marital_status,
+			spouse_name, bank_name, bank_branch, bank_account, COALESCE(payroll_no, ''), COALESCE(designation, ''),
+			COALESCE(department, ''), date_first_appt, date_joined_scheme, expected_retirement,
 			membership_status, basic_salary, account_balance, last_contribution, created_at, updated_at
 		FROM members WHERE id = $1 AND scheme_id = $2
 	`, memberID, schemeID).Scan(
-		&m.ID, &m.SchemeID, &m.MemberNo, &m.FirstName, &m.LastName, &m.OtherNames,
-		&m.Gender, &dob, &m.Nationality, &idNum, &kraPin, &email, &phone,
-		&m.MaritalStatus, &spouse, &m.BankName, &m.BankBranch, &bankAcct,
+		&m.ID, &m.SchemeID, &m.MemberNo, &m.FirstName, &m.LastName, &otherNames,
+		&m.Gender, &dob, &nationality, &idNum, &kraPin, &email, &phone,
+		&maritalStatus, &spouse, &bankName, &bankBranch, &bankAcct,
 		&m.PayrollNo, &m.Designation, &m.Department, &dfa, &djs, &er,
-		&m.MembershipStatus, &m.BasicSalary, &m.AccountBalance, &m.LastContribution,
+		&m.MembershipStatus, &m.BasicSalary, &m.AccountBalance, &lastContribution,
 		&m.CreatedAt, &m.UpdatedAt)
 
 	if err == sql.ErrNoRows {
@@ -438,14 +472,29 @@ func (s *Server) getMember(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, "query failed")
+		respondError(w, http.StatusInternalServerError, "query failed: "+err.Error())
 		return
 	}
 	if dob.Valid {
 		m.DateOfBirth = dob.Time
 	}
+	if otherNames.Valid {
+		m.OtherNames = otherNames.String
+	}
+	if nationality.Valid {
+		m.Nationality = nationality.String
+	}
+	if maritalStatus.Valid {
+		m.MaritalStatus = domain.MaritalStatus(maritalStatus.String)
+	}
 	if idNum.Valid {
 		m.IDNumber = idNum.String
+	}
+	if bankName.Valid {
+		m.BankName = bankName.String
+	}
+	if bankBranch.Valid {
+		m.BankBranch = bankBranch.String
 	}
 	if kraPin.Valid {
 		m.KRAPIN = kraPin.String
@@ -455,6 +504,9 @@ func (s *Server) getMember(w http.ResponseWriter, r *http.Request) {
 	}
 	if phone.Valid {
 		m.Phone = phone.String
+	}
+	if lastContribution.Valid {
+		m.LastContribution = lastContribution.Time
 	}
 	if spouse.Valid {
 		m.SpouseName = spouse.String
@@ -635,8 +687,13 @@ func (s *Server) addBeneficiary(w http.ResponseWriter, r *http.Request) {
 	userID := GetUserID(r)
 
 	var req struct {
-		Name, Relationship, DateOfBirth, IDNumber, Phone, PhysicalAddress string
-		AllocationPct                                                     float64
+		Name            string  `json:"name"`
+		Relationship    string  `json:"relationship"`
+		DateOfBirth     string  `json:"date_of_birth"`
+		IDNumber        string  `json:"id_number"`
+		Phone           string  `json:"phone"`
+		PhysicalAddress string  `json:"physical_address"`
+		AllocationPct   float64 `json:"allocation_pct"`
 	}
 	if err := decodeJSON(r, &req); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
@@ -745,7 +802,7 @@ func (s *Server) listContributions(w http.ResponseWriter, r *http.Request) {
 	}
 	status := r.URL.Query().Get("status")
 
-	query := `SELECT id, member_id, period, employee_amount, employer_amount, avc_amount, total_amount, payment_method, status, registered, created_at FROM contributions WHERE scheme_id = $1`
+	query := `SELECT c.id, c.member_id, c.period, c.employee_amount, c.employer_amount, c.avc_amount, c.total_amount, c.payment_method, c.status, c.registered, c.created_at, COALESCE(m.first_name || ' ' || m.last_name, '') AS member_name FROM contributions c LEFT JOIN members m ON m.id = c.member_id WHERE c.scheme_id = $1`
 	args := []interface{}{schemeID}
 	argCount := 1
 
@@ -766,15 +823,15 @@ func (s *Server) listContributions(w http.ResponseWriter, r *http.Request) {
 
 	var contributions []map[string]interface{}
 	for rows.Next() {
-		var id, memberID, paymentMethod, status string
+		var id, memberID, paymentMethod, status, memberName string
 		var empAmt, erAmt, avcAmt, total int64
 		var period, createdAt time.Time
 		var registered bool
-		if err := rows.Scan(&id, &memberID, &period, &empAmt, &erAmt, &avcAmt, &total, &paymentMethod, &status, &registered, &createdAt); err != nil {
+		if err := rows.Scan(&id, &memberID, &period, &empAmt, &erAmt, &avcAmt, &total, &paymentMethod, &status, &registered, &createdAt, &memberName); err != nil {
 			continue
 		}
 		contributions = append(contributions, map[string]interface{}{
-			"id": id, "member_id": memberID, "period": period, "employee_amount": empAmt,
+			"id": id, "member_id": memberID, "member_name": memberName, "period": period, "employee_amount": empAmt,
 			"employer_amount": erAmt, "avc_amount": avcAmt, "total_amount": total,
 			"payment_method": paymentMethod, "status": status, "registered": registered, "created_at": createdAt,
 		})
@@ -786,7 +843,7 @@ func (s *Server) listContributions(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) memberContributions(w http.ResponseWriter, r *http.Request) {
-	memberID := chi.URLParam(r, "id")
+	memberID := chi.URLParam(r, "member_id")
 
 	rows, err := s.db.QueryContext(r.Context(), `
 		SELECT id, period, employee_amount, employer_amount, avc_amount, total_amount, payment_method, status, created_at
@@ -1094,11 +1151,17 @@ func (s *Server) contributionReport(w http.ResponseWriter, r *http.Request) {
 	respondJSON(w, http.StatusOK, report)
 }
 
-func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
+func (s *Server) exportReport(w http.ResponseWriter, r *http.Request) {
 	schemeID := GetSchemeID(r)
 	exportType := r.URL.Query().Get("type")
 	if exportType == "" {
 		exportType = "members"
+	}
+
+	format := strings.ToLower(r.URL.Query().Get("format"))
+	if format == "xlsx" {
+		s.exportReportXLSX(w, schemeID, exportType)
+		return
 	}
 
 	var buf strings.Builder
@@ -1108,7 +1171,7 @@ func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
 	case "members":
 		writer.Write([]string{"member_no", "first_name", "last_name", "id_number", "phone", "email", "status", "department", "balance", "date_joined"})
 		rows, err := s.db.QueryContext(r.Context(), `
-			SELECT member_no, first_name, last_name, id_number, phone, email, membership_status, department, account_balance, date_joined_scheme
+			SELECT member_no, first_name, last_name, id_number, COALESCE(phone, ''), COALESCE(email, ''), membership_status, COALESCE(department, ''), account_balance, date_joined_scheme
 			FROM members WHERE scheme_id = $1 ORDER BY last_name
 		`, schemeID)
 		if err != nil {
@@ -1154,6 +1217,96 @@ func (s *Server) exportCSV(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/csv")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s-%s.csv", exportType, time.Now().Format("2006-01-02")))
 	w.Write([]byte(buf.String()))
+}
+
+func (s *Server) exportReportXLSX(w http.ResponseWriter, schemeID, exportType string) {
+	f := excelize.NewFile()
+	sheet := "Report"
+	if err := f.SetSheetName("Sheet1", sheet); err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to prepare workbook")
+		return
+	}
+
+	row := 1
+	setHeader := func(headers []string) {
+		for i, h := range headers {
+			cell, _ := excelize.CoordinatesToCellName(i+1, row)
+			f.SetCellValue(sheet, cell, h)
+		}
+		row++
+	}
+
+	switch exportType {
+	case "members":
+		setHeader([]string{"member_no", "first_name", "last_name", "id_number", "phone", "email", "status", "department", "balance", "date_joined"})
+		rows, err := s.db.QueryContext(context.Background(), `
+			SELECT member_no, first_name, last_name, id_number, COALESCE(phone, ''), COALESCE(email, ''), membership_status, COALESCE(department, ''), account_balance, date_joined_scheme
+			FROM members WHERE scheme_id = $1 ORDER BY last_name
+		`, schemeID)
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "query failed")
+			return
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var mn, fn, ln, idn, ph, em, st, dept string
+			var bal int64
+			var dj time.Time
+			if err := rows.Scan(&mn, &fn, &ln, &idn, &ph, &em, &st, &dept, &bal, &dj); err != nil {
+				continue
+			}
+			setHeaderWait := []interface{}{mn, fn, ln, idn, ph, em, st, dept, fmt.Sprintf("%d", bal), dj.Format("2006-01-02")}
+			cell, _ := excelize.CoordinatesToCellName(1, row)
+			for i, v := range setHeaderWait {
+				c, _ := excelize.CoordinatesToCellName(i+1, row)
+				f.SetCellValue(sheet, c, v)
+			}
+			_ = cell
+			row++
+		}
+	case "contributions":
+		setHeader([]string{"member_id", "period", "employee", "employer", "avc", "total", "status", "payment_method"})
+		rows, err := s.db.QueryContext(context.Background(), `
+			SELECT member_id, period, employee_amount, employer_amount, avc_amount, total_amount, status, payment_method
+			FROM contributions WHERE scheme_id = $1 ORDER BY period DESC
+		`, schemeID)
+		if err != nil {
+			respondError(w, http.StatusInternalServerError, "query failed")
+			return
+		}
+		defer rows.Close()
+		for rows.Next() {
+			var mid, pm, st string
+			var emp, er, avc, total int64
+			var period time.Time
+			if err := rows.Scan(&mid, &period, &emp, &er, &avc, &total, &st, &pm); err != nil {
+				continue
+			}
+			values := []interface{}{mid, period.Format("2006-01"), fmt.Sprintf("%d", emp), fmt.Sprintf("%d", er), fmt.Sprintf("%d", avc), fmt.Sprintf("%d", total), st, pm}
+			for i, v := range values {
+				c, _ := excelize.CoordinatesToCellName(i+1, row)
+				f.SetCellValue(sheet, c, v)
+			}
+			row++
+		}
+	default:
+		respondError(w, http.StatusBadRequest, "unknown export type: "+exportType)
+		return
+	}
+
+	if row == 2 {
+		// At least headers were written.
+	}
+
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to write workbook")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s-%s.xlsx", exportType, time.Now().Format("2006-01-02")))
+	w.Write(buf.Bytes())
 }
 
 func (s *Server) ghostReport(w http.ResponseWriter, r *http.Request) {

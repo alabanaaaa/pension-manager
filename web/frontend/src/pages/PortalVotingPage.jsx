@@ -7,7 +7,7 @@ export default function PortalVotingPage() {
   const [candidates, setCandidates] = useState([]);
   const [myVotes, setMyVotes] = useState({});
   const [loading, setLoading] = useState(true);
-  const [voting, setVoting] = useState(null);
+  const [activeElectionId, setActiveElectionId] = useState(null);
   const [selectedCandidate, setSelectedCandidate] = useState('');
   const [processing, setProcessing] = useState(false);
   const [result, setResult] = useState(null);
@@ -35,7 +35,7 @@ export default function PortalVotingPage() {
     try {
       await voting.memberCastVote(electionId, { candidate_id: selectedCandidate });
       setResult({ success: true });
-      setVoting(null);
+      setActiveElectionId(null);
       setSelectedCandidate('');
     } catch (err) {
       setResult({ success: false, error: err.response?.data?.error || 'Vote failed' });
@@ -44,7 +44,7 @@ export default function PortalVotingPage() {
   };
 
   const startVoting = (electionId) => {
-    setVoting(electionId);
+    setActiveElectionId(electionId);
     loadCandidates(electionId);
     setSelectedCandidate('');
     setResult(null);
@@ -97,12 +97,12 @@ export default function PortalVotingPage() {
       )}
 
       {/* Voting Modal - Uber Style */}
-      {voting && (
-        <div className="modal-overlay" onClick={() => setVoting(null)}>
+      {activeElectionId && (
+        <div className="modal-overlay" onClick={() => setActiveElectionId(null)}>
           <div className="modal animate-scale-in" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
               <h3 className="modal-title">Cast Your Vote</h3>
-              <button className="modal-close" onClick={() => setVoting(null)}>
+              <button className="modal-close" onClick={() => setActiveElectionId(null)}>
                 <X size={18} />
               </button>
             </div>
@@ -119,11 +119,11 @@ export default function PortalVotingPage() {
               </select>
             </div>
             <div className="modal-footer">
-              <button onClick={() => setVoting(null)} className="btn btn-secondary">
+              <button onClick={() => setActiveElectionId(null)} className="btn btn-secondary">
                 Cancel
               </button>
               <button
-                onClick={() => handleVote(voting)}
+                onClick={() => handleVote(activeElectionId)}
                 disabled={!selectedCandidate || processing}
                 className="btn btn-primary"
               >

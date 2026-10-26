@@ -79,31 +79,48 @@ func (s *Server) handleCreateElection(w http.ResponseWriter, r *http.Request) {
 		Title         string `json:"title"`
 		Description   string `json:"description,omitempty"`
 		Type          string `json:"type"`
+		ElectionType  string `json:"election_type"`
 		MaxCandidates int    `json:"max_candidates"`
 		StartDate     string `json:"start_date"`
 		EndDate       string `json:"end_date"`
+	}
+	parseElectionDate := func(value string) (time.Time, error) {
+		layouts := []string{
+			"2006-01-02T15:04:05Z07:00",
+			"2006-01-02T15:04:05Z",
+			"2006-01-02T15:04:05",
+			"2006-01-02T15:04",
+			"2006-01-02",
+		}
+		for _, layout := range layouts {
+			if parsed, err := time.Parse(layout, value); err == nil {
+				return parsed, nil
+			}
+		}
+		return time.Time{}, fmt.Errorf("invalid date format")
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		respondError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	startDate, err := time.Parse("2006-01-02T15:04:05Z", req.StartDate)
+	startDate, err := parseElectionDate(req.StartDate)
 	if err != nil {
-		startDate, err = time.Parse("2006-01-02", req.StartDate)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid start_date format")
-			return
-		}
+		respondError(w, http.StatusBadRequest, "invalid start_date format")
+		return
 	}
 
-	endDate, err := time.Parse("2006-01-02T15:04:05Z", req.EndDate)
+	endDate, err := parseElectionDate(req.EndDate)
 	if err != nil {
-		endDate, err = time.Parse("2006-01-02", req.EndDate)
-		if err != nil {
-			respondError(w, http.StatusBadRequest, "invalid end_date format")
-			return
-		}
+		respondError(w, http.StatusBadRequest, "invalid end_date format")
+		return
+	}
+
+	if req.Type == "" {
+		req.Type = req.ElectionType
+	}
+	if req.Type == "" {
+		req.Type = "trustee"
 	}
 
 	election := &domain.Election{
@@ -386,10 +403,16 @@ func (s *Server) handleExportResults(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleMemberListElections(w http.ResponseWriter, r *http.Request) {
 	memberID := r.Context().Value("member_id").(string)
 	schemeID := GetSchemeID(r)
-
+	if schemeID == "" {
+		err := s.db.QueryRowContext(r.Context(), `SELECT scheme_id FROM members WHERE id = $1`, memberID).Scan(&schemeID)
+		if err != nil || schemeID == "" {
+			respondError(w, http.StatusInternalServerError, "could not resolve member scheme")
+			return
+		}
+	}
 	elections, err := s.votingService.ListElections(r.Context(), schemeID)
 	if err != nil {
-		respondError(w, http.StatusInternalServerError, err.Error())
+		respondError(w, http.StatusInternalServerError, "list elections: "+err.Error()+" scheme="+schemeID+", member="+memberID)
 		return
 	}
 

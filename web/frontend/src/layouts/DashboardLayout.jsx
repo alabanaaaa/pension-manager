@@ -89,10 +89,10 @@ export default function DashboardLayout() {
       {/* Sidebar - Uber Bold Black */}
       <aside
         ref={sidebarRef}
+        style={{ transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)' }}
         className={`
-          fixed top-0 left-0 bottom-0 z-40 w-60
+          fixed top-0 left-0 bottom-0 z-40 w-72 bg-black text-white border-r border-[#262626] transition-transform duration-300 ease-in-out flex flex-col
           ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          bg-black text-white transition-transform duration-200 ease-out flex flex-col
         `}
       >
         {/* Logo */}
@@ -100,8 +100,8 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-3">
             <img src={bankLogo} alt="Logo" className="w-8 h-8" />
             <div>
-              <h1 className="text-sm font-bold tracking-tight">PENSION</h1>
-              <p className="text-[10px] text-gray-400 tracking-widest uppercase">Manager</p>
+              <h1 className="text-[16px] font-normal tracking-[0.28em] uppercase">PENSION</h1>
+              <p className="text-[11px] text-[#666666] tracking-[0.25em] uppercase mt-1">Manager</p>
             </div>
           </div>
           <button 
@@ -123,10 +123,10 @@ export default function DashboardLayout() {
                 to={item.href}
                 onClick={() => { setSidebarOpen(false); setMobileMenuOpen(false); }}
                 className={`
-                  flex items-center gap-3 px-3 py-2.5 mb-0.5 text-sm transition-all duration-150 rounded
+                  group flex items-center gap-4 px-5 py-3.5 text-[15px] tracking-[0.18em] uppercase transition-all duration-200 border-l-2 border-transparent
                   ${isActive
-                    ? 'bg-white text-black font-semibold'
-                    : 'text-gray-300 hover:bg-white/10 hover:text-white'
+                    ? 'bg-[#141414] text-white border-l-2 border-white'
+                    : 'text-[#999999] hover:bg-[#0d0d0d] hover:text-white hover:border-l-2 hover:border-[#999999]'
                   }
                 `}
               >
@@ -162,17 +162,21 @@ export default function DashboardLayout() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header - Uber Minimal */}
-        <header className="h-14 border-b border-gray-100 flex items-center justify-between px-6 bg-white/80 backdrop-blur-md sticky top-0 z-20">
+        <header className="h-14 border-b border-[#262626] flex items-center justify-between px-6 bg-[#0d0d0d] text-white sticky top-0 z-20">
           <div className="flex items-center gap-4">
             <button
-              onClick={() => setSidebarOpen(true)}
-              className="p-2 hover:bg-gray-50 rounded-lg transition-all active:scale-95"
-              title="Open menu"
+              onClick={() => setSidebarOpen((open) => !open)}
+              className="p-2 rounded-lg transition-all active:scale-95 hover:bg-[#fa9000]/15"
+              title={sidebarOpen ? 'Collapse menu' : 'Open menu'}
+              aria-expanded={sidebarOpen}
+              aria-label={sidebarOpen ? 'Collapse navigation' : 'Open navigation'}
             >
-              <img src={bankLogo} alt="Menu" className="w-6 h-6 opacity-60 hover:opacity-100 transition-opacity" />
+              <span className={`block transition-all duration-300 ${sidebarOpen ? 'rotate-90 scale-90 opacity-70' : 'rotate-0 scale-100 opacity-100'}`}>
+                {sidebarOpen ? <X size={20} className="text-white" /> : <Menu size={20} className="text-[#999999]" />}
+              </span>
             </button>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-black tracking-tight animate-fade-in">
+              <h2 className="text-base font-semibold text-white tracking-tight animate-fade-in">
                 {getPageTitle()}
               </h2>
             </div>
@@ -181,18 +185,18 @@ export default function DashboardLayout() {
           <div className="flex items-center gap-2">
             {/* Search - Minimal */}
             <div className="relative hidden md:block group">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-gray-500 transition-colors" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-[#fa9000] transition-colors" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="pl-8 pr-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm w-48 focus:outline-none focus:border-black focus:w-64 focus:bg-white transition-all placeholder:text-gray-400"
+                className="pl-8 pr-3 py-2 bg-[#1a1a1a] text-white border border-[#3a3a3a] rounded-lg text-sm w-48 focus:outline-none focus:border-[#fa9000] focus:w-64 focus:bg-[#141414] transition-all placeholder:text-gray-500"
               />
             </div>
             
             {/* Notifications */}
             <button className="relative p-2 hover:bg-gray-50 rounded-lg transition-all active:scale-95">
               <Bell size={18} className="text-gray-500 hover:text-gray-700 transition-colors" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-black rounded-full animate-pulse" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-[#c31833] rounded-full animate-pulse" />
             </button>
           </div>
         </header>

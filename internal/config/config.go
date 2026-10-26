@@ -8,13 +8,14 @@ import (
 )
 
 type Config struct {
-	DatabaseURL string
-	HTTPPort    int
-	JWTSecret   string
-	LogLevel    string
-	Env         string
-	Mpesa       MpesaConfig
-	NewsAPI     NewsAPIConfig
+	DatabaseURL         string
+	HTTPPort            int
+	JWTSecret           string
+	LogLevel            string
+	Env                 string
+	CORSAllowedOrigins  string
+	Mpesa               MpesaConfig
+	NewsAPI             NewsAPIConfig
 }
 
 type MpesaConfig struct {
@@ -36,7 +37,7 @@ func Load() (*Config, error) {
 		HTTPPort:    getEnvInt("HTTP_PORT", 8080),
 		JWTSecret:   getEnv("JWT_SECRET", "change-me-in-production"),
 		LogLevel:    strings.ToLower(getEnv("LOG_LEVEL", "info")),
-		Env:         getEnv("APP_ENV", "development"),
+		Env:                 getEnv("APP_ENV", "development"),
 		Mpesa: MpesaConfig{
 			ConsumerKey:    getEnv("MPESA_CONSUMER_KEY", ""),
 			ConsumerSecret: getEnv("MPESA_CONSUMER_SECRET", ""),

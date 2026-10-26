@@ -108,10 +108,14 @@ func (p *NewsAPIProvider) FetchKenyaNews(ctx context.Context, category string, p
 	for _, a := range apiResp.Articles {
 		pubTime, _ := time.Parse(time.RFC3339, a.PublishedAt)
 		detectedCategory := detectNewsCategory(a.Title, a.Description)
+		content := a.Content
+		if content == "" {
+			content = a.Description
+		}
 		articles = append(articles, Article{
 			Title:       a.Title,
 			Description: a.Description,
-			Content:     a.Content,
+			Content:     content,
 			URL:         a.URL,
 			URLToImage:  a.URLToImage,
 			Source:      a.Source.Name,
@@ -442,6 +446,13 @@ func (p *MockProvider) FetchKenyaNews(ctx context.Context, category string, page
 		// If no articles in category, return general articles
 		if len(filtered) == 0 {
 			filtered = allArticles
+		}
+	}
+
+	// Ensure articles always have readable content for the portal and tests.
+	for i := range filtered {
+		if filtered[i].Content == "" {
+			filtered[i].Content = filtered[i].Description
 		}
 	}
 

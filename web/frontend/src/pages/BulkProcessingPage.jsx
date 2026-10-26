@@ -6,6 +6,9 @@ export default function BulkProcessingPage() {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [result, setResult] = useState(null);
+  const [statementFile, setStatementFile] = useState(null);
+  const [statementUploading, setStatementUploading] = useState(false);
+  const [statementResult, setStatementResult] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [processResult, setProcessResult] = useState(null);
   const [year, setYear] = useState(new Date().getFullYear());
@@ -23,6 +26,20 @@ export default function BulkProcessingPage() {
       setResult({ error: err.response?.data?.error || 'Import failed' });
     }
     finally { setUploading(false); }
+  };
+  const handleStatementImport = async () => {
+    if (!statementFile) return;
+    setStatementUploading(true);
+    setStatementResult(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', statementFile);
+      const res = await bulk.importStatement(formData);
+      setStatementResult(res.data);
+    } catch (err) {
+      setStatementResult({ error: err.response?.data?.error || 'Statement import failed' });
+    }
+    finally { setStatementUploading(false); }
   };
 
   const handleAnnualPosting = async () => {
@@ -92,6 +109,58 @@ export default function BulkProcessingPage() {
                       <p key={i}>Row {e.row}: {e.field} — {e.reason}</p>
                     ))}
                   </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Statement Import */}
+      <div className="card">
+        <div className="card-header flex items-center gap-3">
+          <FileSpreadsheet size={18} className="text-gray-500" />
+          <h2 className="text-base font-semibold text-black">Import Member Statement (Excel)</h2>
+        </div>
+        <div className="card-body space-y-4">
+          <p className="text-sm text-gray-500">
+            Upload a Labo-style workbook containing member and monthly contribution rows.
+            Existing contribution rows for the same member are replaced with the workbook rows.
+          </p>
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center hover:border-black transition-colors">
+            <FileSpreadsheet size={32} className="mx-auto text-gray-300 mb-3" />
+            <p className="text-sm text-gray-500 mb-3">
+              {statementFile ? statementFile.name : 'Choose a .xlsx statement workbook'}
+            </p>
+            <input
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={e => setStatementFile(e.target.files[0])}
+              className="hidden"
+              id="statement-upload"
+            />
+            <label htmlFor="statement-upload" className="btn btn-secondary cursor-pointer">
+              Choose File
+            </label>
+          </div>
+          <button
+            onClick={handleStatementImport}
+            disabled={statementUploading || !statementFile}
+            className="btn btn-primary"
+          >
+            {statementUploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
+            Import Statement
+          </button>
+
+          {statementResult && (
+            <div className={`p-4 rounded-lg flex items-start gap-3 ${statementResult.error ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+              {statementResult.error ? <AlertCircle size={18} className="flex-shrink-0 mt-0.5" /> : <CheckCircle size={18} className="flex-shrink-0 mt-0.5" />}
+              <div>
+                <p className="font-semibold">{statementResult.error ? 'Statement Import Failed' : 'Statement Import Complete'}</p>
+                {!statementResult.error && (
+                  <p className="text-sm mt-1">
+                    {statementResult.member_name} ({statementResult.member_no}) · {statementResult.periods} periods · {statementResult.inserted_rows} imported · Balance KES {Number(statementResult.account_balance).toLocaleString()}
+                  </p>
                 )}
               </div>
             </div>

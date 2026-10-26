@@ -9,6 +9,7 @@ export default function ReportsPage() {
   const [trends, setTrends] = useState([]);
   const [ytd, setYtd] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -30,6 +31,28 @@ export default function ReportsPage() {
     { id: 'ytd', label: 'YTD', icon: Table },
   ];
 
+
+  const handleExport = async () => {
+    setExporting(true);
+    const reportType = activeTab === 'trends' ? 'trends' : activeTab === 'ytd' ? 'ytd' : 'breakdown';
+    try {
+      const response = await reports.exportReport({ type: reportType, year: new Date().getFullYear() });
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contribution-${reportType}-${new Date().getFullYear()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert('Export failed. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-4">
@@ -37,8 +60,8 @@ export default function ReportsPage() {
           <h1 className="text-2xl font-bold tracking-tight text-black">Reports</h1>
           <p className="text-sm text-gray-500 mt-1">Contribution analysis and trends</p>
         </div>
-        <button className="btn btn-secondary flex items-center gap-2">
-          <Download size={14} /> Export
+        <button className="btn btn-secondary flex items-center gap-2" onClick={handleExport} disabled={exporting}>
+          <Download size={14} /> {exporting ? 'Exporting...' : 'Export'}
         </button>
       </div>
 

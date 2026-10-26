@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { contributions } from '../lib/api';
+import { contributions, reports } from '../lib/api';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area, PieChart, Pie, Cell
@@ -14,6 +14,7 @@ export default function ContributionsPage() {
   const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState([]);
   const [stats, setStats] = useState(null);
+  const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -56,6 +57,27 @@ export default function ContributionsPage() {
     return `KES ${value}`;
   };
 
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      const response = await reports.exportReport({ type: 'cumulative', year: new Date().getFullYear() });
+      const blob = new Blob([response.data], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `contributions-${new Date().getFullYear()}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert('Export failed. Please try again.');
+    } finally {
+      setExporting(false);
+    }
+  };
+
   const paymentData = data.reduce((acc, c) => {
     const method = c.payment_method || 'other';
     if (!acc[method]) acc[method] = { name: method, value: 0, count: 0 };
@@ -74,8 +96,8 @@ export default function ContributionsPage() {
           <p className="text-sm text-gray-500 mt-1">{data.length} contribution records</p>
         </div>
         <div className="flex gap-2">
-          <button className="btn btn-secondary flex items-center gap-2">
-            <Download size={14} /> Export
+          <button className="btn btn-secondary flex items-center gap-2" onClick={handleExport} disabled={exporting}>
+            <Download size={14} /> {exporting ? "Exporting..." : "Export"}
           </button>
           <Link to="/contributions/new" className="btn btn-primary flex items-center gap-2">
             <Plus size={14} /> Record

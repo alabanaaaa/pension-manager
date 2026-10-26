@@ -17,7 +17,7 @@ func TestLoadDefaults(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if cfg.DatabaseURL != "postgres://postgres:postgres@localhost:5432/minidb?sslmode=disable" {
+	if cfg.DatabaseURL != "postgres://fatoumata@localhost:5432/minidb?sslmode=disable" {
 		t.Errorf("wrong default DB URL: %s", cfg.DatabaseURL)
 	}
 	if cfg.HTTPPort != 8080 {

@@ -62,15 +62,21 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header - Uber Minimal */}
-      <div className="flex items-end justify-between">
+      {/* Header - Al Jazeera Editorial */}
+      <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 border-b border-[#d8d8d8] pb-6">
         <div className="animate-fade-in-up">
-          <p className="text-sm text-gray-500 mb-1">{greeting}</p>
-          <h1 className="text-2xl font-bold tracking-tight text-black">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-1">Overview of your pension management system</p>
+          <p className="text-[24px] font-light text-[#595959] tracking-wide mb-1" style={{ fontFamily: 'Roboto, sans-serif' }}>
+            Post Retirement Medical Fund and Pension Scheme
+          </p>
+          <h1 className="text-[32px] font-bold tracking-tight text-black" style={{ fontFamily: 'Roboto, sans-serif', lineHeight: 1.25 }}>
+            Dashboard
+          </h1>
+          <p className="text-sm text-[#595959] mt-1">
+            Overview of your pension management system
+          </p>
         </div>
-        <div className="hidden sm:flex items-center gap-2 text-sm text-gray-400 animate-fade-in">
-          <Calendar size={14} />
+        <div className="hidden sm:flex items-center gap-2 text-sm text-[#333333] animate-fade-in border border-[#d8d8d8] rounded px-3 py-2 bg-white">
+          <Calendar size={14} className="text-[#fa9000]" />
           <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
         </div>
       </div>
@@ -81,11 +87,11 @@ export default function DashboardPage() {
           <Link
             key={stat.label}
             to={stat.href}
-            className="group bg-white border border-gray-200 rounded-lg p-5 hover:border-black transition-all duration-150 cursor-pointer"
+            className="group bg-white border border-[#d8d8d8] rounded-lg p-5 hover:border-[#fa9000] transition-all duration-150 cursor-pointer"
             style={{ animationDelay: `${i * 50}ms` }}
           >
             <div className="flex items-start justify-between mb-4">
-              <div className="p-2 border border-gray-200 rounded group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-150">
+              <div className="p-2 border border-[#d8d8d8] rounded group-hover:border-[#fa9000] group-hover:bg-[#fa9000] group-hover:text-white transition-all duration-150">
                 <stat.icon size={18} className="text-black group-hover:text-white transition-colors" />
               </div>
               <ArrowRight size={14} className="text-gray-300 group-hover:text-black group-hover:translate-x-0.5 transition-all" />
@@ -112,10 +118,10 @@ export default function DashboardPage() {
               <Link
                 key={action.label}
                 to={action.href}
-                className="group flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-black hover:bg-gray-50/50 transition-all duration-150"
+                className="group flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-[#fa9000] hover:bg-[#fa9000]/5 transition-all duration-150"
                 style={{ animationDelay: `${300 + i * 50}ms` }}
               >
-                <div className="p-2.5 border border-gray-200 rounded group-hover:border-black group-hover:bg-black group-hover:text-white transition-all duration-150">
+                <div className="p-2.5 border border-[#d8d8d8] rounded group-hover:border-[#fa9000] group-hover:bg-[#fa9000] group-hover:text-white transition-all duration-150">
                   <action.icon size={18} className="text-black group-hover:text-white transition-colors" />
                 </div>
                 <div className="flex-1">
@@ -140,7 +146,7 @@ export default function DashboardPage() {
                 className="flex items-start gap-3" 
                 style={{ animationDelay: `${350 + i * 50}ms` }}
               >
-                <div className="p-2 border border-gray-200 rounded flex-shrink-0 mt-0.5 group-hover:border-black transition-colors">
+                <div className="p-2 border border-[#d8d8d8] rounded flex-shrink-0 mt-0.5 group-hover:border-[#fa9000] transition-colors">
                   <item.icon size={14} className="text-black" />
                 </div>
                 <div className="flex-1 min-w-0">
@@ -155,9 +161,9 @@ export default function DashboardPage() {
 
       {/* Pending Approvals Alert - Uber Style */}
       {pendingCount && pendingCount.total > 0 && (
-        <div className="bg-black text-white rounded-lg p-5 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
+        <div className="bg-[#272967] text-white rounded-lg p-5 animate-fade-in-up" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-white/10 rounded">
+            <div className="p-2.5 border border-[#fa9000] bg-[#fa9000]/20 rounded">
               <AlertTriangle size={20} className="text-white" />
             </div>
             <div className="flex-1">
@@ -168,7 +174,7 @@ export default function DashboardPage() {
             </div>
             <Link 
               to="/maker-checker" 
-              className="px-5 py-2.5 bg-white text-black text-sm font-semibold rounded hover:bg-gray-100 transition-colors flex-shrink-0 hover:scale-105 transition-transform"
+              className="px-5 py-2.5 bg-[#fa9000] text-white text-sm font-semibold rounded hover:bg-[#dd7f00] transition-colors flex-shrink-0 hover:scale-105 transition-transform"
             >
               Review
             </Link>

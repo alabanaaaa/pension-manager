@@ -1,0 +1,175 @@
+/* =========================================================
+   AL JAZEERA DESIGN TOKENS ADAPTED FOR PENSION MANAGER
+   White canvas, dense Roboto type, orange primary accent,
+   black pills, and vivid red for urgent/alert coverage.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,400&display=swap');
+
+:root {
+  --font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --color-accent: #fa9000;
+  --color-accent-hover: #dd7f00;
+  --color-accent-active: #b86900;
+  --color-live-red: #c31833;
+  --color-navy: #272967;
+  --color-night-navy: #100e2f;
+
+  --text: #000000;
+  --text-secondary: #333333;
+  --text-muted: #595959;
+  --bg: #ffffff;
+  --card: #ffffff;
+  --border: #d8d8d8;
+  --radius: 4px;
+  --radius-lg: 10px;
+  --font: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  font-family: var(--font-family);
+}
+
+/* Make the brand action color unmistakably Al Jazeera orange. */
+.btn-primary,
+.btn-accent {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  box-shadow: 0 4px 12px rgba(250, 144, 0, 0.22);
+}
+
+.btn-primary:active:not(:disabled) {
+  background-color: var(--color-accent-active);
+}
+
+.btn-secondary {
+  border-color: var(--border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: var(--color-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Crisp thread-like rules and soft editorial surfaces. */
+.card,
+.bg-white.border {
+  border-color: var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.dashboard-layout aside,
+.bg-black {
+  letter-spacing: 0;
+}
+
+/* Keep urgent items visibly live-red instead of generic rose. */
+.text-rose-600,
+.text-red-600 {
+  color: var(--color-live-red) !important;
+}
+
+/* Make page headings feel like an editorial system stack. */
+h1, h2, h3, h4 {
+  font-family: var(--font-family);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0;
+}
+
+/* Tight inputs with a clear orange focus ring. */
+input:focus,
+button:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+/* Give the whole workspace life instead of a blank white sheet. */
+ .min-h-screen, .min-h-screen.bg-white {
+  background: transparent !important;
+}
+
+body {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(250, 144, 0, 0.10), transparent 30%),
+    radial-gradient(circle at 90% 10%, rgba(39, 41, 103, 0.08), transparent 28%),
+    #f3f3f3;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #fa9000 0 34%, #c31833 34% 58%, #272967 58% 100%);
+  z-index: 1000;
+}
+
+#root {
+  background: transparent;
+}
+
+main {
+  background: #f3f3f3;
+}
+
+/* Make cards clearly differ from the page background. */
+.bg-white {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.bg-white.border,
+.bg-white.border-gray-200 {
+  border-color: #d8d8d8 !important;
+}
+
+/* Stronger Al Jazeera editorial accent on dashboard stat cards. */
+.group.bg-white.border:hover {
+  border-color: #fa9000 !important;
+  box-shadow: 0 10px 30px rgba(250, 144, 0, 0.10);
+}
+
+/* Useful page shells gain a faint orange rail. */
+.bg-white.border.border-gray-200.rounded-lg.p-5:hover,
+.bg-white.border.border-gray-200.rounded-lg.p-4:hover {
+  border-color: #fa9000;
+}
+
+/* Make headline numbers more substantial. */
+.text-2xl,
+.text-3xl {
+  color: #111111;
+}
+
+/* Give tables and list rows a clearer editorial grid. */
+table th {
+  background: #f0f0f0;
+  color: #333333;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+
+table td {
+  border-top: 1px solid #d8d8d8;
+}
+
+/* Slightly reduce the amount of pure-white emptiness inside panels. */
+.p-5,
+.px-5 {
+  background-clip: padding-box;
+}

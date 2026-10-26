@@ -98,6 +98,9 @@ func (s *Server) handleListHospitals(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if hospitals == nil {
+		hospitals = []*domain.Hospital{}
+	}
 	respondJSON(w, http.StatusOK, hospitals)
 }
 

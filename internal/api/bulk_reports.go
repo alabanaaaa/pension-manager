@@ -17,6 +17,7 @@ func (s *Server) registerBulkRoutes(r chi.Router) {
 
 		r.Route("/api/bulk", func(r chi.Router) {
 			r.Post("/import/members", s.handleImportMembers)
+		r.Post("/import/statement", s.handleImportStatement)
 			r.Post("/validate", s.handleValidateBulkUpdate)
 			r.Post("/process/retirements", s.handleProcessRetirements)
 			r.Post("/process/early-leavers", s.handleProcessEarlyLeavers)
@@ -63,6 +64,31 @@ func (s *Server) handleImportMembers(w http.ResponseWriter, r *http.Request) {
 	defer file.Close()
 
 	result, err := s.bulkService.ImportMembersCSV(r.Context(), schemeID, file, userID)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	respondJSON(w, http.StatusOK, result)
+}
+
+func (s *Server) handleImportStatement(w http.ResponseWriter, r *http.Request) {
+	schemeID := GetSchemeID(r)
+	userID := GetUserID(r)
+
+	if err := r.ParseMultipartForm(50 << 20); err != nil {
+		respondError(w, http.StatusBadRequest, "failed to parse form")
+		return
+	}
+
+	file, _, err := r.FormFile("file")
+	if err != nil {
+		respondError(w, http.StatusBadRequest, "statement file is required")
+		return
+	}
+	defer file.Close()
+
+	result, err := s.bulkService.ImportMemberStatement(r.Context(), schemeID, file, userID)
 	if err != nil {
 		respondError(w, http.StatusBadRequest, err.Error())
 		return

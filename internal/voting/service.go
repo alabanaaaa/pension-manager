@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"pension-manager/core/domain"
@@ -35,9 +36,9 @@ func (s *Service) CreateElection(ctx context.Context, election *domain.Election)
 	}
 
 	query := `
-		INSERT INTO elections (id, scheme_id, title, description, type, status, max_candidates,
+		INSERT INTO elections (id, scheme_id, title, description, type, election_type, status, max_candidates,
 		                       start_date, end_date, created_by, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+		VALUES ($1, $2, $3, $4, $5, $5, $6, $7, $8, $9, $10, $11, $12)
 	`
 	_, err := s.db.ExecContext(ctx, query,
 		election.ID, election.SchemeID, election.Title, election.Description,
@@ -75,14 +76,15 @@ func (s *Service) GetElection(ctx context.Context, electionID string) (*domain.E
 
 // ListElections returns all elections for a scheme
 func (s *Service) ListElections(ctx context.Context, schemeID string) ([]*domain.Election, error) {
+	log.Println("ListElections schemeID=", schemeID, "len=", len(schemeID))
 	query := `
-		SELECT id, scheme_id, title, description, COALESCE(election_type,''), status, max_candidates,
-		       COALESCE(start_date, NOW()), COALESCE(end_date, NOW()), COALESCE(created_by,''), total_voters, total_votes, created_at, updated_at
+		SELECT id, scheme_id, title, description, COALESCE(type,''), status, max_candidates,
+		       COALESCE(start_date, NOW()), COALESCE(end_date, NOW()), COALESCE(created_by::text,''), total_voters, total_votes, created_at, updated_at
 		FROM elections WHERE scheme_id = $1 ORDER BY start_date DESC
 	`
 	rows, err := s.db.QueryContext(ctx, query, schemeID)
 	if err != nil {
-		return nil, fmt.Errorf("list elections: %w", err)
+		return nil, fmt.Errorf("list elections: %w [scheme=%q len=%d]", err, schemeID, len(schemeID))
 	}
 	defer rows.Close()
 
@@ -302,9 +304,9 @@ func (s *Service) CastVote(ctx context.Context, vote *domain.Vote) error {
 		// Record vote
 		vote.VotedAt = time.Now()
 		_, err = tx.ExecContext(ctx, `
-			INSERT INTO votes (id, election_id, member_id, candidate_id, voting_method, voted_at,
+			INSERT INTO votes (id, election_id, member_id, candidate_id, voting_method, channel, voted_at,
 			                   mobile_number, gps_latitude, gps_longitude, ip_address, user_agent)
-			VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+			VALUES (uuid_generate_v4(), $1, $2, $3, $4, $4, $5, $6, $7, $8, $9, $10)
 		`, vote.ElectionID, vote.MemberID, vote.CandidateID, vote.VotingMethod,
 			vote.VotedAt, vote.MobileNumber, vote.GPSLatitude, vote.GPSLongitude,
 			vote.IPAddress, vote.UserAgent)

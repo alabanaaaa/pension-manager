@@ -1,43 +1,44 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import DashboardLayout from './layouts/DashboardLayout';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
-import MembersPage from './pages/MembersPage';
-import AddMemberPage from './pages/AddMemberPage';
-import MemberDetailsPage from './pages/MemberDetailsPage';
-import EditMemberPage from './pages/EditMemberPage';
-import ContributionsPage from './pages/ContributionsPage';
-import ClaimsPage from './pages/ClaimsPage';
-import ClaimDetailsPage from './pages/ClaimDetailsPage';
-import VotingPage from './pages/VotingPage';
-import HospitalsPage from './pages/HospitalsPage';
-import HospitalDetailsPage from './pages/HospitalDetailsPage';
-import ReportsPage from './pages/ReportsPage';
-import SponsorsPage from './pages/SponsorsPage';
-import BulkProcessingPage from './pages/BulkProcessingPage';
-import MakerCheckerPage from './pages/MakerCheckerPage';
-import TaxPage from './pages/TaxPage';
-import SMSPage from './pages/SMSPage';
-import NewsPage from './pages/NewsPage';
-import SecurityPage from './pages/SecurityPage';
-import SettingsPage from './pages/SettingsPage';
-import PortalDashboardPage from './pages/PortalDashboardPage';
-import PortalProfilePage from './pages/PortalProfilePage';
-import PortalContributionsPage from './pages/PortalContributionsPage';
-import PortalClaimsPage from './pages/PortalClaimsPage';
-import PortalVotingPage from './pages/PortalVotingPage';
-import PortalProjectionsPage from './pages/PortalProjectionsPage';
-import PortalFeedbackPage from './pages/PortalFeedbackPage';
-import PortalNewsPage from './pages/PortalNewsPage';
-import NewElectionPage from './pages/NewElectionPage';
-import ManageElectionPage from './pages/ManageElectionPage';
-import ElectionResultsPage from './pages/ElectionResultsPage';
-import AddHospitalPage from './pages/AddHospitalPage';
-import AddSponsorPage from './pages/AddSponsorPage';
-import NewClaimPage from './pages/NewClaimPage';
-import RecordContributionPage from './pages/RecordContributionPage';
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const MembersPage = lazy(() => import('./pages/MembersPage'));
+const AddMemberPage = lazy(() => import('./pages/AddMemberPage'));
+const MemberDetailsPage = lazy(() => import('./pages/MemberDetailsPage'));
+const EditMemberPage = lazy(() => import('./pages/EditMemberPage'));
+const ContributionsPage = lazy(() => import('./pages/ContributionsPage'));
+const ClaimsPage = lazy(() => import('./pages/ClaimsPage'));
+const ClaimDetailsPage = lazy(() => import('./pages/ClaimDetailsPage'));
+const VotingPage = lazy(() => import('./pages/VotingPage'));
+const HospitalsPage = lazy(() => import('./pages/HospitalsPage'));
+const HospitalDetailsPage = lazy(() => import('./pages/HospitalDetailsPage'));
+const ReportsPage = lazy(() => import('./pages/ReportsPage'));
+const SponsorsPage = lazy(() => import('./pages/SponsorsPage'));
+const BulkProcessingPage = lazy(() => import('./pages/BulkProcessingPage'));
+const MakerCheckerPage = lazy(() => import('./pages/MakerCheckerPage'));
+const TaxPage = lazy(() => import('./pages/TaxPage'));
+const SMSPage = lazy(() => import('./pages/SMSPage'));
+const NewsPage = lazy(() => import('./pages/NewsPage'));
+const SecurityPage = lazy(() => import('./pages/SecurityPage'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
+const PortalDashboardPage = lazy(() => import('./pages/PortalDashboardPage'));
+const PortalProfilePage = lazy(() => import('./pages/PortalProfilePage'));
+const PortalContributionsPage = lazy(() => import('./pages/PortalContributionsPage'));
+const PortalClaimsPage = lazy(() => import('./pages/PortalClaimsPage'));
+const PortalVotingPage = lazy(() => import('./pages/PortalVotingPage'));
+const PortalProjectionsPage = lazy(() => import('./pages/PortalProjectionsPage'));
+const PortalFeedbackPage = lazy(() => import('./pages/PortalFeedbackPage'));
+const PortalNewsPage = lazy(() => import('./pages/PortalNewsPage'));
+const NewElectionPage = lazy(() => import('./pages/NewElectionPage'));
+const ManageElectionPage = lazy(() => import('./pages/ManageElectionPage'));
+const ElectionResultsPage = lazy(() => import('./pages/ElectionResultsPage'));
+const AddHospitalPage = lazy(() => import('./pages/AddHospitalPage'));
+const AddSponsorPage = lazy(() => import('./pages/AddSponsorPage'));
+const NewClaimPage = lazy(() => import('./pages/NewClaimPage'));
+const RecordContributionPage = lazy(() => import('./pages/RecordContributionPage'));
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-neutral-900 border-t-transparent rounded-full" /></div>;
@@ -47,7 +48,8 @@ function ProtectedRoute({ children }) {
 
 function AppRoutes() {
   return (
-    <Routes>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin w-8 h-8 border-2 border-black border-t-transparent rounded-full"></div></div>}>
+      <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
@@ -92,6 +94,7 @@ function AppRoutes() {
       </Route>
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
+      </Suspense>
   );
 }
 

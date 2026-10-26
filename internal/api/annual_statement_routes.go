@@ -270,14 +270,15 @@ func (s *Server) handleDownloadAnnualStatementPDF(w http.ResponseWriter, r *http
 	var memberID, year string
 	var closingBalance int64
 	var firstName, lastName, memberNo, email string
+	var dateOfBirth time.Time
 
 	err := s.db.QueryRowContext(r.Context(), `
 		SELECT as2.member_id, as2.year, as2.closing_balance,
-		       m.first_name, m.last_name, m.member_no, m.email
+		       m.first_name, m.last_name, m.member_no, m.email, m.date_of_birth
 		FROM annual_statements as2
 		JOIN members m ON m.id = as2.member_id
 		WHERE as2.id = $1
-	`, statementID).Scan(&memberID, &year, &closingBalance, &firstName, &lastName, &memberNo, &email)
+	`, statementID).Scan(&memberID, &year, &closingBalance, &firstName, &lastName, &memberNo, &email, &dateOfBirth)
 
 	if err != nil {
 		respondError(w, http.StatusNotFound, "annual statement not found")
@@ -286,9 +287,20 @@ func (s *Server) handleDownloadAnnualStatementPDF(w http.ResponseWriter, r *http
 
 	pdf := generateAnnualStatementPDF(memberNo, firstName, lastName, email, year, closingBalance)
 
+	userPassword := memberNo
+	if !dateOfBirth.IsZero() {
+		userPassword = memberNo + "-" + dateOfBirth.Format("20060102")
+	}
+	encrypted, err := encryptPDFWithPassword(pdf, userPassword)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to secure statement PDF")
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/pdf")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=annual_statement_%s_%s.pdf", memberNo, year))
-	w.Write(pdf)
+	w.Header().Set("X-Document-Password", userPassword)
+	w.Write(encrypted)
 }
 
 func (s *Server) handleEmailAnnualStatement(w http.ResponseWriter, r *http.Request) {
@@ -329,7 +341,7 @@ func (s *Server) handleEmailAnnualStatement(w http.ResponseWriter, r *http.Reque
 	respondJSON(w, http.StatusOK, map[string]string{
 		"status":  "email_queued",
 		"email":   email,
-		"message": fmt.Sprintf("Annual statement for %d will be sent to %s", year, email),
+		"message": fmt.Sprintf("Annual statement for %s will be sent to %s", year, email),
 	})
 }
 

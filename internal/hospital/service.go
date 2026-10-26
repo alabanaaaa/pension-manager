@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"pension-manager/core/domain"
+
+	"github.com/google/uuid"
 	"pension-manager/internal/db"
 )
 
@@ -34,6 +36,9 @@ func NewHospitalService(db *db.DB) *HospitalService {
 func (s *HospitalService) CreateHospital(ctx context.Context, hospital *domain.Hospital) error {
 	if hospital == nil {
 		return errors.New("hospital cannot be nil")
+	}
+	if hospital.ID == "" {
+		hospital.ID = uuid.New().String()
 	}
 	if err := hospital.Validate(); err != nil {
 		return err

@@ -108,7 +108,7 @@ CREATE TABLE IF NOT EXISTS pending_changes (
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 CREATE INDEX idx_pending_changes_entity ON pending_changes(entity_type, entity_id);
-CREATE INDEX idx_pending_changes_status ON pending_changes(status);
+CREATE INDEX IF NOT EXISTS idx_pending_changes_status ON pending_changes(status);
 CREATE INDEX idx_pending_changes_scheme ON pending_changes(scheme_id);
 
 -- Document management table (already exists in 001, add missing columns)

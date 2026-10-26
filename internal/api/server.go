@@ -6,6 +6,11 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"sync"
+	"strings"
 	"time"
 
 	"pension-manager/internal/auth"
@@ -135,12 +140,25 @@ func (s *Server) Handler() http.Handler {
 }
 
 func (s *Server) mountMiddleware() {
+	origins := []string{}
+	for _, origin := range strings.Split(s.cfg.CORSAllowedOrigins, ",") {
+		origin = strings.TrimSpace(origin)
+		if origin != "" {
+			origins = append(origins, origin)
+		}
+	}
+	if len(origins) == 0 {
+		origins = []string{"http://localhost:3000"}
+	}
+
 	s.router.Use(middleware.RequestID)
 	s.router.Use(middleware.RealIP)
 	s.router.Use(middleware.Recoverer)
 	s.router.Use(middleware.Timeout(30 * time.Second))
+	s.router.Use(middleware.RequestSize(20 << 20))
+	s.router.Use(secureHeadersMiddleware)
 	s.router.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"https://*", "http://*"},
+		AllowedOrigins:   origins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -154,11 +172,14 @@ func (s *Server) mountRoutes() {
 	s.router.Get("/health", s.healthCheck)
 	s.router.Get("/ready", s.readinessCheck)
 
-	s.router.Post("/api/auth/login", s.login)
-	s.router.Post("/api/auth/member-login", s.memberLogin)
-	s.router.Post("/api/auth/refresh", s.refreshToken)
-	s.router.Get("/api/auth/otp", s.requestOTP)
-	s.router.Post("/api/auth/unlock/{id}", s.unlockUser)
+	s.router.Group(func(r chi.Router) {
+		r.Use(authRateLimitMiddleware(30, time.Minute))
+		r.Post("/api/auth/login", s.login)
+		r.Post("/api/auth/member-login", s.memberLogin)
+		r.Post("/api/auth/refresh", s.refreshToken)
+		r.Get("/api/auth/otp", s.requestOTP)
+		r.Post("/api/auth/unlock/{id}", s.unlockUser)
+	})
 
 	// M-Pesa callback (no auth required - called by Safaricom)
 	s.router.Post("/api/mpesa/callback", s.mpesaCallback)
@@ -192,7 +213,7 @@ func (s *Server) mountRoutes() {
 		// Phase 1: Reports
 		r.Get("/api/reports/quarterly", s.quarterlyReport)
 		r.Get("/api/reports/contributions", s.contributionReport)
-		r.Get("/api/reports/export", s.exportCSV)
+		r.Get("/api/reports/export", s.exportReport)
 
 		// Phase 1: Ghost Mode (fraud detection)
 		r.Get("/api/ghost", s.ghostReport)
@@ -288,6 +309,109 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return server.Shutdown(ctx)
 }
 
+func secureHeadersMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		h := w.Header()
+		h.Set("X-Content-Type-Options", "nosniff")
+		h.Set("X-Frame-Options", "DENY")
+		h.Set("X-XSS-Protection", "0")
+		h.Set("Referrer-Policy", "strict-origin-when-cross-origin")
+		h.Set("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+		h.Set("Cross-Origin-Opener-Policy", "same-origin-allow-popups")
+		if r.TLS != nil {
+			h.Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func authRateLimitMiddleware(limit int, window time.Duration) func(http.Handler) http.Handler {
+	type bucket struct {
+		count int
+		reset time.Time
+	}
+	var mu sync.Mutex
+	buckets := map[string]*bucket{}
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ip := strings.TrimSpace(r.RemoteAddr)
+			if ip == "" {
+				ip = "unknown"
+			}
+
+			mu.Lock()
+			now := time.Now()
+			b, ok := buckets[ip]
+			if !ok || now.After(b.reset) {
+				b = &bucket{reset: now.Add(window)}
+				buckets[ip] = b
+			}
+			if b.count >= limit {
+				mu.Unlock()
+				w.Header().Set("Retry-After", fmt.Sprintf("%.0f", window.Seconds()))
+				respondJSON(w, http.StatusTooManyRequests, map[string]string{"error": "too many authentication attempts"})
+				return
+			}
+			b.count++
+			mu.Unlock()
+
+			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+func encryptPDFWithPassword(input []byte, userPassword string) ([]byte, error) {
+	if len(input) == 0 || userPassword == "" {
+		return input, nil
+	}
+	if _, err := exec.LookPath("gs"); err != nil {
+		return nil, fmt.Errorf("ghostscript is not installed: %w", err)
+	}
+
+	tmpDir, err := os.MkdirTemp("", "pension-pdf-*")
+	if err != nil {
+		return nil, err
+	}
+	defer os.RemoveAll(tmpDir)
+
+	inputPath := filepath.Join(tmpDir, "input.pdf")
+	outputPath := filepath.Join(tmpDir, "encrypted.pdf")
+	if err := os.WriteFile(inputPath, input, 0o600); err != nil {
+		return nil, err
+	}
+
+	// Keep the owner password out of the member-facing flow. It only needs to be
+	// strong enough to prevent unattended redaction of an exported copy.
+	ownerPassword := "pension-manager-owner"
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(
+		ctx,
+		"gs",
+		"-q",
+		"-dBATCH",
+		"-dNOPAUSE",
+		"-sDEVICE=pdfwrite",
+		"-dCompatibilityLevel=1.4",
+		"-dPDFSETTINGS=/default",
+		"-sUserPassword="+userPassword,
+		"-sOwnerPassword="+ownerPassword,
+		"-sOutputFile="+outputPath,
+		"-f",
+		inputPath,
+	)
+	if output, err := cmd.CombinedOutput(); err != nil {
+		return nil, fmt.Errorf("encrypt PDF with ghostscript: %w (%s)", err, strings.TrimSpace(string(output)))
+	}
+
+	encrypted, err := os.ReadFile(outputPath)
+	if err != nil {
+		return nil, err
+	}
+	return encrypted, nil
+}
 func respondJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

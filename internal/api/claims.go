@@ -10,6 +10,7 @@ import (
 	"pension-manager/core/domain"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 )
 
 // ClaimWithMember extends Claim with member details
@@ -93,6 +94,7 @@ func (s *Server) handleCreateClaim(w http.ResponseWriter, r *http.Request) {
 	}
 
 	claim := &domain.Claim{
+		ID:            uuid.New().String(),
 		MemberID:      req.MemberID,
 		SchemeID:      schemeID,
 		ClaimType:     domain.ClaimType(req.ClaimType),
@@ -130,8 +132,8 @@ func (s *Server) handleCreateClaim(w http.ResponseWriter, r *http.Request) {
 
 		// Record audit event
 		_, err = tx.ExecContext(r.Context(), `
-			INSERT INTO audit_log (id, scheme_id, entity_type, entity_id, action, actor_id, created_at)
-			VALUES (uuid_generate_v4(), $1, 'claim', $2, 'created', $3, NOW())
+			INSERT INTO audit_log (scheme_id, entity_type, entity_id, action, actor_id, created_at)
+			VALUES ($1, 'claim', $2, 'created', $3, NOW())
 		`, schemeID, claim.ID, userID)
 		return err
 	})
@@ -209,7 +211,7 @@ func (s *Server) handleListClaims(w http.ResponseWriter, r *http.Request) {
 			&c.ID, &c.MemberID, &c.ClaimType, &c.ClaimFormNo, &c.DateOfClaim,
 			&dateOfLeaving, &c.LeavingReason, &c.Status, &examinerID,
 			&rejectionReason, &settlementDate, &chequeRef, &chequeDate,
-			&c.Amount, &c.CreatedAt, &c.UpdatedAt, &reviewedAt, &c.PaidAt,
+			&c.Amount, &c.CreatedAt, &c.UpdatedAt, &reviewedAt, &paidAt,
 			&c.MemberNo, &c.FirstName, &c.LastName,
 		); err != nil {
 			respondError(w, http.StatusInternalServerError, fmt.Sprintf("failed to scan claim: %v", err))
@@ -242,6 +244,9 @@ func (s *Server) handleListClaims(w http.ResponseWriter, r *http.Request) {
 		}
 		claims = append(claims, c)
 	}
+	if claims == nil {
+		claims = []ClaimWithMember{}
+	}
 
 	respondJSON(w, http.StatusOK, claims)
 }
@@ -266,15 +271,15 @@ func (s *Server) handleGetClaim(w http.ResponseWriter, r *http.Request) {
 		WHERE c.id = $1
 	`
 	var c ClaimWithMember
-	var examinerID, rejectionReason, chequeRef sql.NullString
+	var examinerID, rejectionReason, chequeRef, bankName, bankBranch, bankAccount sql.NullString
 	var dateOfLeaving, settlementDate, chequeDate, reviewedAt, paidAt sql.NullTime
 	err := s.db.QueryRowContext(r.Context(), query, claimID).Scan(
 		&c.ID, &c.MemberID, &c.ClaimType, &c.ClaimFormNo, &c.DateOfClaim,
 		&dateOfLeaving, &c.LeavingReason, &c.Status, &examinerID,
 		&rejectionReason, &settlementDate, &chequeRef, &chequeDate,
-		&c.Amount, &c.CreatedAt, &c.UpdatedAt, &reviewedAt, &c.PaidAt,
+		&c.Amount, &c.CreatedAt, &c.UpdatedAt, &reviewedAt, &paidAt,
 		&c.MemberNo, &c.FirstName, &c.LastName, &c.Phone, &c.Email,
-		&c.BankName, &c.BankBranch, &c.BankAccount,
+		&bankName, &bankBranch, &bankAccount,
 	)
 	if err == sql.ErrNoRows {
 		respondError(w, http.StatusNotFound, "claim not found")

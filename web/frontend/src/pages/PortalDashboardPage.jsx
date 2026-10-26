@@ -82,7 +82,7 @@ export default function PortalDashboardPage() {
       {/* Stats - Uber Style */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: User, label: 'Member No', value: profile?.member_no || '—' },
+          { icon: User, label: 'Member No', value: profile?.employment_info?.member_no || '—' },
           { icon: CreditCard, label: 'Contributions', value: contribCount },
           { icon: FileText, label: 'Pending Claims', value: claimCount },
           { icon: Vote, label: 'Open Elections', value: elections.length },

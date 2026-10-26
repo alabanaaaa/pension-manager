@@ -355,10 +355,11 @@ func (s *Server) handleDownloadStatementPDF(w http.ResponseWriter, r *http.Reque
 
 	var memberNo, firstName, lastName, email, phone string
 	var balance int64
+	var dateOfBirth time.Time
 	err := s.db.QueryRowContext(r.Context(), `
-		SELECT member_no, first_name, last_name, email, phone, account_balance
+		SELECT member_no, first_name, last_name, email, phone, account_balance, date_of_birth
 		FROM members WHERE id = $1
-	`, memberID).Scan(&memberNo, &firstName, &lastName, &email, &phone, &balance)
+	`, memberID).Scan(&memberNo, &firstName, &lastName, &email, &phone, &balance, &dateOfBirth)
 	if err != nil {
 		respondError(w, http.StatusNotFound, "member not found")
 		return
@@ -371,10 +372,20 @@ func (s *Server) handleDownloadStatementPDF(w http.ResponseWriter, r *http.Reque
 	}
 
 	pdf := generateMemberStatementPDF(memberNo, firstName, lastName, email, phone, balance, contributions)
+	userPassword := memberNo
+	if !dateOfBirth.IsZero() {
+		userPassword = memberNo + "-" + dateOfBirth.Format("20060102")
+	}
+	encrypted, err := encryptPDFWithPassword(pdf, userPassword)
+	if err != nil {
+		respondError(w, http.StatusInternalServerError, "failed to secure statement PDF")
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/pdf")
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=statement_%s_%s.pdf", memberNo, time.Now().Format("2006-01-02")))
-	w.Write(pdf)
+	w.Header().Set("X-Document-Password", userPassword)
+	w.Write(encrypted)
 }
 
 // handleToggleMemberPortal handles PUT /admin/members/{id}/portal

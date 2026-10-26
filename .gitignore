@@ -1,0 +1,22 @@
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Binaries
+/server
+*.exe
+*.out
+
+# Node/Frontend
+node_modules/
+web/frontend/dist/
+web/frontend/node_modules/
+
+# Misc
+*.log
+tmp/
+coverage/
+.DS_Store
+Thumbs.db
+PY

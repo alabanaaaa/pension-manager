@@ -140,6 +140,9 @@ export const bulk = {
   importMembers: (formData) => api.post('/bulk/import/members', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
+  importStatement: (formData) => api.post('/bulk/import/statement', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
   validate: (data) => api.post('/bulk/validate', data),
   processRetirements: (data) => api.post('/bulk/process/retirements', data),
   processEarlyLeavers: (data) => api.post('/bulk/process/early-leavers', data),

@@ -104,7 +104,7 @@ type AccountSummary struct {
 // GetMemberProfile retrieves the full member profile for the portal
 func (s *Service) GetMemberProfile(ctx context.Context, memberID string) (*MemberProfile, error) {
 	query := `
-		SELECT m.member_no, m.first_name, m.last_name,
+		SELECT m.member_no, COALESCE(m.first_name || ' ' || m.last_name, ''),
 		       COALESCE(m.other_names, ''), COALESCE(m.gender, ''), m.date_of_birth,
 		       COALESCE(m.nationality, ''), COALESCE(m.id_number, ''), COALESCE(m.kra_pin, ''),
 		       COALESCE(m.email, ''), COALESCE(m.phone, ''), COALESCE(m.postal_address, ''),
@@ -128,7 +128,7 @@ func (s *Service) GetMemberProfile(ctx context.Context, memberID string) (*Membe
 
 	err := s.db.QueryRowContext(ctx, query, memberID).Scan(
 		&profile.EmploymentInfo.MemberNo,
-		&profile.PersonalInfo.FullName, &profile.PersonalInfo.FullName, // first_name, last_name
+		&profile.PersonalInfo.FullName,
 		&otherNames, &profile.PersonalInfo.Gender, &profile.PersonalInfo.DateOfBirth,
 		&profile.PersonalInfo.Nationality, &profile.PersonalInfo.NationalID,
 		&profile.PersonalInfo.KRAPIN,

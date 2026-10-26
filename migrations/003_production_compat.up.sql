@@ -1,0 +1,38 @@
+-- Add columns used by newer handlers and compatibility defaults
+ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS pay_mode TEXT;
+ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS bank_name TEXT;
+ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS bank_branch TEXT;
+ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS bank_account TEXT;
+ALTER TABLE sponsors ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS bank_name TEXT;
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS bank_branch TEXT;
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS bank_account TEXT;
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE claims ADD COLUMN IF NOT EXISTS partial_payments JSONB;
+
+ALTER TABLE audit_log ADD COLUMN IF NOT EXISTS actor_id UUID;
+
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS reason TEXT;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS certificate_no TEXT;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS monthly_limit BIGINT;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS relief_amount BIGINT;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS kra_reference TEXT;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS created_by UUID;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS approved_by UUID;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS approved_at TIMESTAMPTZ;
+ALTER TABLE tax_exemptions ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'pending';
+
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS total_contributions BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS member_contributions BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS sponsor_contributions BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS basic_salary BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS member_rate DOUBLE PRECISION;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS sponsor_rate DOUBLE PRECISION;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'generated';
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS hold_reason TEXT;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS generated_by UUID;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS generated_at TIMESTAMPTZ;
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE annual_statements ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
