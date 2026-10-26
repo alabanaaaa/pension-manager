@@ -69,7 +69,7 @@ CREATE TABLE pending_member_changes (
     reviewed_at         TIMESTAMPTZ
 );
 CREATE INDEX idx_pending_changes_member ON pending_member_changes(member_id);
-CREATE INDEX idx_pending_changes_status ON pending_member_changes(status);
+CREATE INDEX IF NOT EXISTS idx_pending_member_changes_status ON pending_member_changes(status);
 
 -- ============================================================
 -- EDI PROCESSING (Employer Data Interchange)
